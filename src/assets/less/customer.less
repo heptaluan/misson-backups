@@ -1,0 +1,145 @@
+@import "common.less";
+.main {
+  .search-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .group {
+      display: flex;
+      justify-items: center;
+      align-items: center;
+      margin-right: 15px;
+
+      .title {
+        color: rgba(0, 0, 0, 0.85);
+        margin-right: 10px;
+        text-align: right;
+        width: 80px;
+        flex: 0 0 85px;
+      }
+
+      .search-label {
+        color: rgba(0, 0, 0, 0.85);
+        margin-right: 10px;
+        text-align: right;
+        min-width: 45px;
+      }
+    }
+
+    .ant-btn {
+      margin-right: 15px;
+    }
+  }
+}
+
+.footer-bar {
+  margin-top: 10px;
+  padding: 10px 30px;
+  text-align: right;
+  background: transparent;
+  border-top: 1px solid #e8e8e8;
+  border-radius: 0 0 4px 4px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center
+}
+.footer-bar .ant-btn {
+  margin-right: 15px;
+}
+.footer-bar .flex-1 {
+  flex: 1;
+}
+.b-form-row {
+  margin-bottom: 20px;
+  padding: 5px 15px;
+  .form-label {
+    margin-right: 15px;
+    width: 72px;
+    text-align: right;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+
+    &.large-label {
+      width: 120px;
+    }
+  }
+  .b-form-item {
+    display: flex;
+  }
+  .form-control {
+    .ant-select {
+      width: 100%;
+    }
+  }
+}
+
+.image-ipload {
+  .ant-upload.ant-upload-drag {
+    background-color: #FFFFFF;
+  }
+}
+
+.ant-btn-primary {
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+
+.search-group {
+  flex-wrap: wrap;
+  margin-bottom: 0 !important;
+  .group {
+    margin-right: 0 !important;
+    &.tiny {
+      .ant-input-affix-wrapper {
+        width: 90px !important;
+      }
+      .ant-select {
+        width: 120px !important;
+      }
+    }
+    &.sm {
+      .ant-input-affix-wrapper {
+        width: 140px !important;
+      }
+      .ant-select {
+        width: 160px !important;
+      }
+    }
+    &.md {
+      .ant-input-affix-wrapper {
+        width: 180px !important;
+      }
+      .ant-select {
+        width: 200px !important;
+      }
+    }
+    &.lg {
+      .ant-select, .ant-input {
+        width: 360px !important;
+      }
+    }
+    &.noMarginBottom {
+      .ant-row {
+        margin-bottom: 0;
+      }
+    }
+    &.btn {
+      align-self: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      max-width: 50px !important;
+      width: initial !important;
+      &.long {
+        max-width: initial !important;
+      }
+    }
+  }
+}
