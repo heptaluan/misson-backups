@@ -13,7 +13,7 @@ const api = {
   deleteBatch: prefix + '/deleteBatch',
   delete: prefix + '/delete',
   exportXlsUrl: prefix + '/exportXls',
-  importExcelUrl: prefix + '/importExcelUrl'
+  importExcelUrl: prefix + '/importExcelUrl',
 }
 
 export default api

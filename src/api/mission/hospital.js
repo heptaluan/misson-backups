@@ -15,7 +15,7 @@ const api = {
   delete: prefix + '/delete',
   exportXlsUrl: prefix + '/exportXls',
   importExcelUrl: prefix + '/importExcelUrl',
-  getRegions: '/system/syRegions/list'
+  getRegions: '/system/syRegions/list',
 }
 
 export default api
@@ -24,7 +24,7 @@ export function getHospitalList(parameter) {
   return axios({
     url: api.list,
     method: 'get',
-    params: parameter
+    params: parameter,
   })
 }
 
@@ -32,7 +32,7 @@ export function getHospitalById(parameter) {
   return axios({
     url: api.detail,
     method: 'get',
-    params: parameter
+    params: parameter,
   })
 }
 
@@ -40,7 +40,7 @@ export function addHospital(parameter) {
   return axios({
     url: api.add,
     method: 'post',
-    data: parameter
+    data: parameter,
   })
 }
 
@@ -48,7 +48,7 @@ export function putHospital(parameter) {
   return axios({
     url: api.put,
     method: 'put',
-    data: parameter
+    data: parameter,
   })
 }
 
@@ -56,7 +56,7 @@ export function delHospital(parameter) {
   return axios({
     url: api.delete,
     method: 'delete',
-    params: parameter
+    params: parameter,
   })
 }
 
@@ -64,6 +64,6 @@ export function delBatchHospital(parameter) {
   return axios({
     url: api.deleteBatch,
     method: 'delete',
-    params: parameter
+    params: parameter,
   })
 }
