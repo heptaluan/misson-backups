@@ -12,19 +12,19 @@ const DEFAULT_VALUE = '?'
 export default {
   model: {
     prop: 'prop',
-    event: 'change'
+    event: 'change',
   },
   props: {
     prop: {
       type: String,
-      default: DEFAULT_VALUE
+      default: DEFAULT_VALUE,
     },
     disabled: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  data () {
+  data() {
     const type = TYPE_EVERY
     return {
       DEFAULT_VALUE,
@@ -41,33 +41,33 @@ export default {
       // 对于不同的类型，所定义的值也有所不同
       valueRange: {
         start: 0,
-        end: 0
+        end: 0,
       },
       valueLoop: {
         start: 0,
-        interval: 1
+        interval: 1,
       },
       valueWeek: {
         start: 0,
-        end: 0
+        end: 0,
       },
       valueList: [],
       valueWork: 1,
       maxValue: 0,
-      minValue: 0
+      minValue: 0,
     }
   },
   watch: {
-    prop (newVal, oldVal) {
+    prop(newVal, oldVal) {
       if (newVal === this.value_c) {
         // console.info('skip ' + newVal)
         return
       }
       this.parseProp(newVal)
-    }
+    },
   },
   computed: {
-    value_c () {
+    value_c() {
       let result = []
       switch (this.type) {
         case TYPE_NOT_SET:
@@ -110,12 +110,12 @@ export default {
     },
   },
   methods: {
-    parseProp (value) {
+    parseProp(value) {
       if (value === this.value_c) {
         // console.info('same ' + value)
         return
       }
-      if (typeof (this.preProcessProp) === 'function') {
+      if (typeof this.preProcessProp === 'function') {
         value = this.preProcessProp(value)
       }
       try {
@@ -149,7 +149,7 @@ export default {
           this.valueLast = parseInt(values[0])
         } else if (value.indexOf(',') >= 0 || !isNaN(value)) {
           this.type = TYPE_SPECIFY
-          this.valueList = value.split(',').map(item => parseInt(item))
+          this.valueList = value.split(',').map((item) => parseInt(item))
         } else {
           this.type = TYPE_EVERY
         }
@@ -157,6 +157,6 @@ export default {
         // console.info(e)
         this.type = TYPE_EVERY
       }
-    }
-  }
+    },
+  },
 }
