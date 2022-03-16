@@ -1,13 +1,8 @@
 <template>
   <div>
-    <div class="j-markdown-editor" :id="id"/>
+    <div class="j-markdown-editor" :id="id" />
     <div v-if="isShow">
-      <j-modal
-        title="图片上传"
-        :visible.sync="dialogVisible"
-        width="30%"
-        :before-close="handleClose"
-        @ok="handleOk">
+      <j-modal title="图片上传" :visible.sync="dialogVisible" width="30%" :before-close="handleClose" @ok="handleOk">
         <a-tabs default-active-key="1" @change="handleChange">
           <a-tab-pane tab="本地图片上传" key="1" :forceRender="true">
             <j-upload v-model="fileList" :number="1"></j-upload>
@@ -27,10 +22,10 @@
 
 <script>
 import 'codemirror/lib/codemirror.css'
-import '@toast-ui/editor/dist/toastui-editor.css';
-import '@toast-ui/editor/dist/i18n/zh-cn';
+import '@toast-ui/editor/dist/toastui-editor.css'
+import '@toast-ui/editor/dist/i18n/zh-cn'
 
-import Editor from '@toast-ui/editor';
+import Editor from '@toast-ui/editor'
 import defaultOptions from './default-options'
 import JUpload from '@/components/jeecg/JUpload'
 import { getFileAccessHttpUrl } from '@/api/manage'
@@ -43,48 +38,48 @@ export default {
   props: {
     value: {
       type: String,
-      default: ''
+      default: '',
     },
     id: {
       type: String,
       required: false,
       default() {
         return 'markdown-editor-' + +new Date() + ((Math.random() * 1000).toFixed(0) + '')
-      }
+      },
     },
     options: {
       type: Object,
       default() {
         return defaultOptions
-      }
+      },
     },
     mode: {
       type: String,
-      default: 'markdown'
+      default: 'markdown',
     },
     height: {
       type: String,
       required: false,
-      default: '300px'
+      default: '300px',
     },
     language: {
       type: String,
       required: false,
-      default: 'zh-CN'
-    }
+      default: 'zh-CN',
+    },
   },
   data() {
     return {
       editor: null,
-      isShow:false,
-      activeIndex:"1",
-      dialogVisible:false,
-      index:"1",
-      fileList:[],
-      remark:"",
-      imageName:"",
-      imageUrl:"",
-      networkPic:""
+      isShow: false,
+      activeIndex: '1',
+      dialogVisible: false,
+      index: '1',
+      fileList: [],
+      remark: '',
+      imageName: '',
+      imageUrl: '',
+      networkPic: '',
     }
   },
   computed: {
@@ -94,7 +89,7 @@ export default {
       options.height = this.height
       options.language = this.language
       return options
-    }
+    },
   },
   watch: {
     value(newValue, preValue) {
@@ -111,7 +106,7 @@ export default {
     },
     mode(newValue) {
       this.editor.changeMode(newValue)
-    }
+    },
   },
   mounted() {
     this.initEditor()
@@ -123,7 +118,7 @@ export default {
     initEditor() {
       this.editor = new Editor({
         el: document.getElementById(this.id),
-        ...this.editorOptions
+        ...this.editorOptions,
       })
       if (this.value) {
         this.editor.setMarkdown(this.value)
@@ -136,34 +131,34 @@ export default {
        * 添加自定义按钮
        */
       //获取编辑器上的功能条
-      let toolbar = this.editor.getUI().getToolbar();
-      let fileDom = this.$refs.files;
+      let toolbar = this.editor.getUI().getToolbar()
+      let fileDom = this.$refs.files
       //添加图片点击事件
-      this.editor.eventManager.addEventType('isShowClickEvent');
+      this.editor.eventManager.addEventType('isShowClickEvent')
       this.editor.eventManager.listen('isShowClickEvent', () => {
         this.isShow = true
         this.dialogVisible = true
-      });
+      })
       //addImageBlobHook图片上传、剪切、拖拽都会走此方法
       // 删除默认监听事件
       this.editor.eventManager.removeEventHandler('addImageBlobHook')
       // 添加自定义监听事件
       this.editor.eventManager.listen('addImageBlobHook', (blob, callback) => {
-        this.upload(blob, url => {
+        this.upload(blob, (url) => {
           callback(url)
         })
       })
       // 添加自定义按钮 第二个参数代表位置，不传默认放在最后
-      toolbar.insertItem(15,{
+      toolbar.insertItem(15, {
         type: 'button',
-        options:{
+        options: {
           name: 'customize',
           className: 'tui-image tui-toolbar-icons',
           event: 'isShowClickEvent',
           tooltip: '上传图片',
-        }
+        },
         //
-      });
+      })
       //--end 添加自定义上传按钮
     },
     destroyEditor() {
@@ -183,73 +178,70 @@ export default {
     getHtml() {
       return this.editor.getHtml()
     },
-    handleOk(){
-      if(this.index=='1'){
+    handleOk() {
+      if (this.index == '1') {
         this.imageUrl = getFileAccessHttpUrl(this.fileList)
-        if(this.remark){
-          this.addImgToMd(this.imageUrl,this.remark)
-        }else{
-          this.addImgToMd(this.imageUrl,"")
+        if (this.remark) {
+          this.addImgToMd(this.imageUrl, this.remark)
+        } else {
+          this.addImgToMd(this.imageUrl, '')
         }
-      }else{
-        if(this.remark){
-          this.addImgToMd(this.networkPic,this.remark)
-        }else{
-          this.addImgToMd(this.networkPic,"")
+      } else {
+        if (this.remark) {
+          this.addImgToMd(this.networkPic, this.remark)
+        } else {
+          this.addImgToMd(this.networkPic, '')
         }
       }
-      this.index="1"
-      this.fileList=[]
-      this.imageName="";
-      this.imageUrl="";
-      this.remark=""
-      this.networkPic=""
-      this.dialogVisible=false
-      this.isShow=false;
+      this.index = '1'
+      this.fileList = []
+      this.imageName = ''
+      this.imageUrl = ''
+      this.remark = ''
+      this.networkPic = ''
+      this.dialogVisible = false
+      this.isShow = false
     },
     handleClose(done) {
-      done();
+      done()
     },
-    handleChange(val){
-      this.fileList=[]
-      this.remark=""
-      this.imageName=""
-      this.imageUrl=""
-      this.networkPic=""
-      this.index=val
+    handleChange(val) {
+      this.fileList = []
+      this.remark = ''
+      this.imageName = ''
+      this.imageUrl = ''
+      this.networkPic = ''
+      this.index = val
     },
     //添加图片到markdown
-    addImgToMd(data,name) {
-      let editor = this.editor.getCodeMirror();
-      let editorHtml = this.editor.getCurrentModeEditor();
-      let isMarkdownMode = this.editor.isMarkdownMode();
+    addImgToMd(data, name) {
+      let editor = this.editor.getCodeMirror()
+      let editorHtml = this.editor.getCurrentModeEditor()
+      let isMarkdownMode = this.editor.isMarkdownMode()
       if (isMarkdownMode) {
-        editor.replaceSelection(`![${name}](${data})`);
+        editor.replaceSelection(`![${name}](${data})`)
       } else {
-        let range = editorHtml.getRange();
-        let img = document.createElement('img');
-        img.src = `${data}`;
-        img.alt = name;
-        range.insertNode(img);
+        let range = editorHtml.getRange()
+        let img = document.createElement('img')
+        img.src = `${data}`
+        img.alt = name
+        range.insertNode(img)
       }
     },
   },
   model: {
     prop: 'value',
-    event: 'change'
-  }
+    event: 'change',
+  },
 }
 </script>
 <style scoped lang="less">
-
-  .j-markdown-editor {
-    /deep/ .tui-editor-defaultUI {
-      .te-mode-switch,
-      .tui-scrollsync
-      {
-        line-height: 1.5;
-      }
+.j-markdown-editor {
+  /deep/ .tui-editor-defaultUI {
+    .te-mode-switch,
+    .tui-scrollsync {
+      line-height: 1.5;
     }
   }
-
+}
 </style>
