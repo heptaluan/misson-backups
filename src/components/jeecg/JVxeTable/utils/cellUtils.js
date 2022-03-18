@@ -10,7 +10,7 @@ export const JVXERenderType = {
 /** 安装所有vxe组件 */
 export function installAllCell(VXETable) {
   // 遍历所有组件批量注册
-  Object.keys(AllCells).forEach(type => installOneCell(VXETable, type))
+  Object.keys(AllCells).forEach((type) => installOneCell(VXETable, type))
 }
 
 /** 安装单个vxe组件 */
@@ -58,16 +58,18 @@ export function installCellRender(VXETable, type, comp = AllCells[JVXETypes.norm
 
 function createRender(comp, enhanced, renderType) {
   return function (h, renderOptions, params) {
-    return [h(comp, {
-      props: {
-        value: params.row[params.column.property],
-        row: params.row,
-        column: params.column,
-        params: params,
-        renderOptions: renderOptions,
-        renderType: renderType,
-      }
-    })]
+    return [
+      h(comp, {
+        props: {
+          value: params.row[params.column.property],
+          row: params.row,
+          column: params.column,
+          params: params,
+          renderOptions: renderOptions,
+          renderType: renderType,
+        },
+      }),
+    ]
   }
 }
 
@@ -90,14 +92,14 @@ export function getEnhanced(type) {
  * @param name 可空，增强名称，留空返回所有增强
  */
 export function getEnhancedMixins(type, name) {
-  const getByName = (e) => name ? e[name] : e
+  const getByName = (e) => (name ? e[name] : e)
   if (AllCellsMixins.has(type)) {
     return getByName(AllCellsMixins.get(type))
   }
   let defEnhanced = JVxeCellMixins.enhanced
   let enhanced = getEnhanced(type)
   if (enhanced) {
-    Object.keys(defEnhanced).forEach(key => {
+    Object.keys(defEnhanced).forEach((key) => {
       let def = defEnhanced[key]
       if (enhanced.hasOwnProperty(key)) {
         // 方法如果存在就不覆盖
@@ -114,7 +116,6 @@ export function getEnhancedMixins(type, name) {
   AllCellsMixins.set(type, defEnhanced)
   return getByName(defEnhanced)
 }
-
 
 /** 辅助方法：替换${...}变量 */
 export function replaceProps(col, value) {
