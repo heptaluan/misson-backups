@@ -54,19 +54,23 @@ export const TagsSpanCell = {
               tagProps.color = color
             }
           }
-          tags.push(h('a-tag', {
-            props: tagProps,
-            style: tagStyle,
-          }, [tag]))
+          tags.push(
+            h(
+              'a-tag',
+              {
+                props: tagProps,
+                style: tagStyle,
+              },
+              [tag]
+            )
+          )
         }
       }
       return tags
     },
   },
   render(h) {
-    return h('div', {}, [
-      this.renderTags(h)
-    ])
+    return h('div', {}, [this.renderTags(h)])
   },
 }
 
@@ -90,28 +94,29 @@ export const TagsInputCell = {
     },
   },
   methods: {
-
     handleInputChange(value, event) {
       this.innerTagValue = replaceValue(value, event)
       this.handleChangeCommon(this.innerTagValue)
       return this.innerTagValue
     },
-
   },
   render(h) {
     return h('a-input', {
       props: {
         value: this.innerValue,
-        ...this.cellProps
+        ...this.cellProps,
       },
       on: {
         change: (event) => {
-          let {target, target: {value}} = event
+          let {
+            target,
+            target: { value },
+          } = event
           let newValue = this.handleInputChange(value, event)
           if (newValue !== value) {
             target.value = newValue
           }
-        }
+        },
       },
     })
   },
@@ -135,7 +140,10 @@ function replaceValue(value, event) {
       }
     })
     if (event && count > 0) {
-      let {target, target: {selectionStart}} = event
+      let {
+        target,
+        target: { selectionStart },
+      } = event
       target.selectionStart = selectionStart + count
       target.selectionEnd = selectionStart + count
     }
