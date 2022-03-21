@@ -4,102 +4,103 @@
     <div slot="title">
       <span>{{ title }}</span>
       <span style="float: right" title="关闭">
-        <a-icon type="close" @click="visible=false"/>
+        <a-icon type="close" @click="visible = false" />
       </span>
     </div>
     <a-input :value="inputContent" :disabled="disabled" @change="handleInputChange">
       <a-icon slot="suffix" type="fullscreen" @click.stop="pop" />
     </a-input>
     <div slot="content">
-      <a-textarea ref="textarea" :value="inputContent" :disabled="disabled" @input="handleInputChange" :style="{ height: height + 'px', width: width + 'px' }"/>
+      <a-textarea
+        ref="textarea"
+        :value="inputContent"
+        :disabled="disabled"
+        @input="handleInputChange"
+        :style="{ height: height + 'px', width: width + 'px' }"
+      />
     </div>
   </a-popover>
 </template>
 
 <script>
-  export default {
-    name: 'JInputPop',
-    props:{
-      title:{
-        type:String,
-        default:'',
-        required:false
-      },
-      position:{
-        type:String,
-        default:'right',
-        required:false
-      },
-      height:{
-        type:Number,
-        default:200,
-        required:false
-      },
-      width:{
-        type:Number,
-        default:150,
-        required:false
-      },
-      value:{
-        type:String,
-        required:false
-      },
-      popContainer:{
-        type:String,
-        default:'',
-        required:false
-      },
-      disabled: {
-        type: Boolean,
-        default: false,
-      },
-
+export default {
+  name: 'JInputPop',
+  props: {
+    title: {
+      type: String,
+      default: '',
+      required: false,
     },
-    data(){
-      return {
-        visible:false,
-        inputContent:''
-
-      }
+    position: {
+      type: String,
+      default: 'right',
+      required: false,
     },
-
-    watch:{
-      value:{
-        immediate:true,
-        handler:function(){
-          if(this.value && this.value.length>0){
-            this.inputContent = this.value;
-          }
-        }
-      },
+    height: {
+      type: Number,
+      default: 200,
+      required: false,
     },
-    model: {
-      prop: 'value',
-      event: 'change'
+    width: {
+      type: Number,
+      default: 150,
+      required: false,
     },
-    methods:{
-      handleInputChange(event){
-        this.inputContent = event.target.value
-        this.$emit('change',this.inputContent)
-      },
-      pop(){
-        this.visible=true
-        this.$nextTick(() => {
-          this.$refs.textarea.focus()
-        })
-      },
-      getPopupContainer(node){
-        if(!this.popContainer){
-          return node.parentNode
-        }else{
-          return document.getElementById(this.popContainer)
-        }
-
-      }
+    value: {
+      type: String,
+      required: false,
+    },
+    popContainer: {
+      type: String,
+      default: '',
+      required: false,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      visible: false,
+      inputContent: '',
     }
-  }
+  },
+
+  watch: {
+    value: {
+      immediate: true,
+      handler: function () {
+        if (this.value && this.value.length > 0) {
+          this.inputContent = this.value
+        }
+      },
+    },
+  },
+  model: {
+    prop: 'value',
+    event: 'change',
+  },
+  methods: {
+    handleInputChange(event) {
+      this.inputContent = event.target.value
+      this.$emit('change', this.inputContent)
+    },
+    pop() {
+      this.visible = true
+      this.$nextTick(() => {
+        this.$refs.textarea.focus()
+      })
+    },
+    getPopupContainer(node) {
+      if (!this.popContainer) {
+        return node.parentNode
+      } else {
+        return document.getElementById(this.popContainer)
+      }
+    },
+  },
+}
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

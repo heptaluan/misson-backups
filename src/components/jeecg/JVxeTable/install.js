@@ -12,7 +12,7 @@ import { getEnhancedMixins, installAllCell, installOneCell } from '@/components/
 
 // VxeGrid所有的方法映射
 const VxeGridMethodsMap = {}
-Object.keys(Grid.methods).forEach(key => {
+Object.keys(Grid.methods).forEach((key) => {
   // 使用eval可以避免闭包（但是要注意不要写es6的代码）
   VxeGridMethodsMap[key] = eval(`(function(){return this.$refs.vxe.${key}.apply(this.$refs.vxe,arguments)})`)
 })
@@ -26,9 +26,9 @@ const VXETableSettings = {
   table: {
     validConfig: {
       // 校验提示方式：强制使用tooltip
-      message: 'tooltip'
-    }
-  }
+      message: 'tooltip',
+    },
+  },
 }
 
 // 执行注册方法
@@ -63,7 +63,11 @@ VXETable.interceptor.add('event.clearActived', function (params, event, target) 
       return false
     }
     // 点击的标签是JPopup的弹出层、部门选择、用户选择
-    if (className.includes('j-popup-modal') || className.includes('j-depart-select-modal') || className.includes('j-user-select-modal')) {
+    if (
+      className.includes('j-popup-modal') ||
+      className.includes('j-depart-select-modal') ||
+      className.includes('j-user-select-modal')
+    ) {
       return false
     }
     // 执行增强
@@ -81,7 +85,7 @@ VXETable.interceptor.add('event.clearActived', function (params, event, target) 
  * @param span 显示组件，可空，默认为 JVxeNormalCell 组件
  */
 export function mapCell(type, cell, span) {
-  let cells = {[type]: cell}
+  let cells = { [type]: cell }
   if (span) {
     cells[type + ':span'] = span
   }
@@ -96,7 +100,13 @@ export function mapCell(type, cell, span) {
  * @param span 显示组件，可空，默认为 JVxeNormalCell 组件
  */
 export function installCell(type, cell, span) {
-  let exclude = [JVXETypes.rowNumber, JVXETypes.rowCheckbox, JVXETypes.rowRadio, JVXETypes.rowExpand, JVXETypes.rowDragSort]
+  let exclude = [
+    JVXETypes.rowNumber,
+    JVXETypes.rowCheckbox,
+    JVXETypes.rowRadio,
+    JVXETypes.rowExpand,
+    JVXETypes.rowDragSort,
+  ]
   if (exclude.includes(type)) {
     throw new Error(`【installCell】不能使用"${type}"作为组件的type，因为这是关键字。`)
   }
