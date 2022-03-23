@@ -34,7 +34,7 @@ import JSelectPosition from '../jeecgbiz/JSelectPosition.vue'
 import JSelectRole from '../jeecgbiz/JSelectRole.vue'
 import JSelectUserByDep from '../jeecgbiz/JSelectUserByDep.vue'
 //引入需要全局注册的js函数和变量
-import { Modal, notification,message } from 'ant-design-vue'
+import { Modal, notification, message } from 'ant-design-vue'
 import lodash_object from 'lodash'
 import debounce from 'lodash/debounce'
 import pick from 'lodash.pick'
@@ -84,8 +84,8 @@ export default {
     Vue.prototype.$Jmodal = Modal
     Vue.prototype.$Jmessage = message
     Vue.prototype.$Jlodash = lodash_object
-    Vue.prototype.$Jdebounce= debounce
+    Vue.prototype.$Jdebounce = debounce
     Vue.prototype.$Jpick = pick
     Vue.prototype.$Jpcaa = data
-  }
+  },
 }
