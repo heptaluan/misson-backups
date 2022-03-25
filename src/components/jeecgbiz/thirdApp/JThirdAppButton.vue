@@ -1,7 +1,19 @@
 <template>
   <span v-if="syncToApp || syncToLocal">
-    <j-third-app-dropdown v-if="enabledTypes.wechatEnterprise" type="wechatEnterprise" name="企微" v-bind="bindAttrs" v-on="bindEvents"/>
-    <j-third-app-dropdown v-if="enabledTypes.dingtalk" type="dingtalk" name="钉钉" v-bind="bindAttrs" v-on="bindEvents"/>
+    <j-third-app-dropdown
+      v-if="enabledTypes.wechatEnterprise"
+      type="wechatEnterprise"
+      name="企微"
+      v-bind="bindAttrs"
+      v-on="bindEvents"
+    />
+    <j-third-app-dropdown
+      v-if="enabledTypes.dingtalk"
+      type="dingtalk"
+      name="钉钉"
+      v-bind="bindAttrs"
+      v-on="bindEvents"
+    />
   </span>
   <span v-else>未设置任何同步方向</span>
 </template>
@@ -23,12 +35,12 @@ const backEndUrl = {
   dingtalk: {
     user: '/sys/thirdApp/sync/dingtalk/user',
     depart: '/sys/thirdApp/sync/dingtalk/depart',
-  }
+  },
 }
 
 export default {
   name: 'JThirdAppButton',
-  components: {JThirdAppDropdown},
+  components: { JThirdAppDropdown },
   props: {
     // 同步类型，可以是 user、depart
     bizType: {
@@ -54,7 +66,7 @@ export default {
     bindAttrs() {
       return {
         syncToApp: this.syncToApp,
-        syncToLocal: this.syncToLocal
+        syncToLocal: this.syncToLocal,
       }
     },
     bindEvents() {
@@ -105,64 +117,63 @@ export default {
             model.update({
               keyboard: false,
               okText: '同步中…',
-              cancelButtonProps: {props: {disabled: true}}
+              cancelButtonProps: { props: { disabled: true } },
             })
             return getAction(url, {
-              ids: selectedRowKeys.join(',')
-            }).then(res => {
-              let options = null
-              if (res.result) {
-                options = {
-                  width: 600,
-                  title: res.message,
-                  content: (h) => {
-                    let nodes
-                    let successInfo = [
-                      `成功信息如下：`,
-                      this.renderTextarea(h, res.result.successInfo.map((v, i) => `${i + 1}. ${v}`).join('\n')),
-                    ]
-                    if (res.success) {
-                      nodes = [
-                        ...successInfo,
-                        h('br'),
-                        `无失败信息！`,
+              ids: selectedRowKeys.join(','),
+            })
+              .then((res) => {
+                let options = null
+                if (res.result) {
+                  options = {
+                    width: 600,
+                    title: res.message,
+                    content: (h) => {
+                      let nodes
+                      let successInfo = [
+                        `成功信息如下：`,
+                        this.renderTextarea(h, res.result.successInfo.map((v, i) => `${i + 1}. ${v}`).join('\n')),
                       ]
-                    } else {
-                      nodes = [
-                        `失败信息如下：`,
-                        this.renderTextarea(h, res.result.failInfo.map((v, i) => `${i + 1}. ${v}`).join('\n')),
-                        h('br'),
-                        ...successInfo,
-                      ]
-                    }
-                    return nodes
+                      if (res.success) {
+                        nodes = [...successInfo, h('br'), `无失败信息！`]
+                      } else {
+                        nodes = [
+                          `失败信息如下：`,
+                          this.renderTextarea(h, res.result.failInfo.map((v, i) => `${i + 1}. ${v}`).join('\n')),
+                          h('br'),
+                          ...successInfo,
+                        ]
+                      }
+                      return nodes
+                    },
                   }
                 }
-              }
-              if (res.success) {
-                if (options != null) {
-                  this.$success(options)
+                if (res.success) {
+                  if (options != null) {
+                    this.$success(options)
+                  } else {
+                    this.$message.success(res.message)
+                  }
+                  this.$emit('sync-ok')
                 } else {
-                  this.$message.success(res.message)
+                  if (options != null) {
+                    this.$warning(options)
+                  } else {
+                    this.$message.warning(res.message)
+                  }
+                  this.$emit('sync-error')
                 }
-                this.$emit('sync-ok')
-              } else {
-                if (options != null) {
-                  this.$warning(options)
-                } else {
-                  this.$message.warning(res.message)
-                }
-                this.$emit('sync-error')
-              }
-            }).catch(() => model.destroy()).finally(() => {
-              resolve()
-              this.$emit('sync-finally', {
-                type,
-                direction,
-                isToApp: direction === '/toApp',
-                isToLocal: direction === '/toLocal',
               })
-            })
+              .catch(() => model.destroy())
+              .finally(() => {
+                resolve()
+                this.$emit('sync-finally', {
+                  type,
+                  direction,
+                  isToApp: direction === '/toApp',
+                  isToLocal: direction === '/toLocal',
+                })
+              })
           },
           onCancel() {
             resolve()
@@ -175,15 +186,15 @@ export default {
         props: {
           value: value,
           readOnly: true,
-          autosize: {minRows: 5, maxRows: 10},
+          autosize: { minRows: 5, maxRows: 10 },
         },
         style: {
           // 关闭textarea的自动换行，使其可以左右滚动
           whiteSpace: 'pre',
           overflow: 'auto',
-        }
+        },
       })
-    }
+    },
   },
 }
 
@@ -196,7 +207,7 @@ export async function loadEnabledTypes() {
   if (enabledTypes != null) {
     return cloneObject(enabledTypes)
   } else {
-    let {success, result} = await getAction(backEndUrl.getEnabledType)
+    let { success, result } = await getAction(backEndUrl.getEnabledType)
     if (success) {
       // 在此缓存
       enabledTypes = cloneObject(result)
@@ -209,6 +220,4 @@ export async function loadEnabledTypes() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
