@@ -3,48 +3,56 @@
   <a-descriptions title="用户信息">
     <a-descriptions-item label="用户姓名">{{patientInfo.name}}</a-descriptions-item>
     <a-descriptions-item label="年龄">{{patientInfo.age}}</a-descriptions-item>
-    <a-descriptions-item label="样本编号">{{patientInfo.sampleCode}}</a-descriptions-item>
+    <a-descriptions-item label="样本编号">{{patientInfo.orderCode}}</a-descriptions-item>
     <a-descriptions-item label="性别">{{patientInfo.sex}}</a-descriptions-item>
     <a-descriptions-item label="住 院 号">{{patientInfo.patientId}}</a-descriptions-item>
     <a-descriptions-item label="送检医师">{{patientInfo.sendDoctor}}</a-descriptions-item>
     <a-descriptions-item label="临床诊断">{{patientInfo.clinical}}</a-descriptions-item>
-    <a-descriptions-item label="送检单位">{{patientInfo.sendAgency}}</a-descriptions-item>
-    <a-descriptions-item label="送检日期">{{patientInfo.sendDate}}</a-descriptions-item>
-    <a-descriptions-item label="检测方法">{{patientInfo.detectionMethod}}</a-descriptions-item>
+    <a-descriptions-item label="送检单位">{{patientInfo.sendHospital_dictText}}</a-descriptions-item>
+    <a-descriptions-item label="送检日期">{{patientInfo.createTime}}</a-descriptions-item>
+    <a-descriptions-item label="检测方法">血液蛋白组学/代谢组学，以及医学影像等多组学技术</a-descriptions-item>
   </a-descriptions>
   <a-divider style="margin-bottom: 32px"/>
   <a-descriptions title="订单信息">
     <a-descriptions-item label="订单号">{{report.orderId}}</a-descriptions-item>
-    <a-descriptions-item label="病例编号">1000000000</a-descriptions-item>
+    <a-descriptions-item label="病例编号">{{patientInfo.orderCode}}</a-descriptions-item>
     <a-descriptions-item label="状态">已出报告</a-descriptions-item>
     <a-descriptions-item label="代谢组结果">{{report.ananpanReportValue}}</a-descriptions-item>
-    <a-descriptions-item label="代谢组进度">已出报告</a-descriptions-item>
-    <a-descriptions-item label="报告日期">{{report.ananpanTime}}</a-descriptions-item>
-    <a-descriptions-item label="基因组结果">中风险</a-descriptions-item>
-    <a-descriptions-item label="基因组状态">已出报告</a-descriptions-item>
-    <a-descriptions-item label="报告日期">{{report.geneTime}}</a-descriptions-item>
+    <a-descriptions-item label="代谢组状态">{{report.ananpanReportValue ? '已完成': '-'}}</a-descriptions-item>
+    <a-descriptions-item label="完成日期">{{report.ananpanTime}}</a-descriptions-item>
+    <a-descriptions-item label="基因组结果">{{report.geneReportValue}}</a-descriptions-item>
+    <a-descriptions-item label="基因组状态">{{report.geneReportValue ? '已完成': '-'}}</a-descriptions-item>
+    <a-descriptions-item label="完成日期">{{report.geneTime}}</a-descriptions-item>
     <a-descriptions-item label="影像组结果">{{report.imageReportValue}}</a-descriptions-item>
-    <a-descriptions-item label="影像组状态">已出报告</a-descriptions-item>
-    <a-descriptions-item label="报告日期">{{report.imageTime}}</a-descriptions-item>
+    <a-descriptions-item label="影像组状态">{{report.imageReportValue ? '已完成': '-'}}</a-descriptions-item>
+    <a-descriptions-item label="完成日期">{{report.imageTime}}</a-descriptions-item>
   </a-descriptions>
   <a-divider style="margin-bottom: 32px"/>
   <div class="report-result">
-    <span class="status-label">中风险</span>
+<!--    <span class="status-label">中风险</span>-->
     <a-descriptions title="代谢结果" >
-      <a-descriptions-item label="肺癌">{{report.ananpanReportValue}}</a-descriptions-item>
+      <a-descriptions-item label="代谢得分">{{report.ananpanReportValue}}</a-descriptions-item>
+    </a-descriptions>
+  </div>
+  <div class="report-result" v-if="report.geneReportValue">
+    <a-descriptions title="基因结果">
+      <a-descriptions-item label="基因得分">{{report.geneReportValue}}</a-descriptions-item>
     </a-descriptions>
   </div>
   <a-divider style="margin-bottom: 32px"/>
-  <div class="title">影像结果</div>
+  <a-descriptions title="影像结果" >
+    <a-descriptions-item label="影像结果">{{report.imageReportValue}}</a-descriptions-item>
+  </a-descriptions>
   <div class="image-result">
-    <div class="edit-toolbar-save">
+    <div class="edit-toolbar-save" v-if="false">
       <a-button @click="handleComplete()">保存</a-button>
     </div>
     <div class="image-result-list">
       <div class="image-result-item" v-for="(item, index) in dicomResult.nodulesList" :key="index">
-        <a-card :class="{'hight-risk': item.scrynMaligant >= 60}">
+        <span class="status-label" v-if="item.invisable === '1'"></span>
+        <a-card :class="{'hight-risk': calcMaligant(item.scrynMaligant)}">
           <div class="image-result-item__content">
-            <div class="edit-toolbar">
+            <div class="edit-toolbar" v-if="false">
               <a-button-group>
                 <a-button @click="handleEditImage(item, index)">编辑</a-button>
                 <a-button @click="handleDeleteImage(item, index)">
@@ -60,64 +68,75 @@
   </div>
   <a-modal
     v-model="ModifyVisible"
-    width="1024px"
+    class="report-detail-modal"
+    width="1096px"
     title="AI影像表观--修改"
     @ok="handleOk"
   >
     <a-spin :spinning="confirmLoading">
       <div class="image-result">
-      <div class="item-content-image">
-        <div class="title" v-html="modelTitle"></div>
-        <div class="b-flex">
-          <dicom-image :url="mForm.imageUrl1" footer="横断面" class="b-flex-2"></dicom-image>
-          <dicom-image :url="mForm.imageUrl2" footer="局部细节" class="b-flex-1"></dicom-image>
+        <div class="item-content-image">
+          <div class="title" v-html="modelTitle"></div>
+          <div class="b-flex">
+            <dicom-image :url="mForm.imageUrl1" footer="横断面" class="b-flex-5 margin-right-sm"></dicom-image>
+            <dicom-image :url="mForm.imageUrl2" footer="局部细节" class="b-flex-3"></dicom-image>
+          </div>
         </div>
-      </div>
-      <div class="item-content-info">
-        <div class="item-info-row">
-          <label>影像层:</label>
-          <span v-html="mForm.iamgeNumber"></span>
+        <div class="item-content-info">
+          <div class="item-info-row">
+            <label>影像层:</label>
+            <span v-html="mForm.iamgeNumber"></span>
+          </div>
+          <a-form-model ref="editFrom" :model="mForm" :rules="validatorRules" slot="detail">
+            <a-form-model-item label="肺" prop="lung" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <span v-html="mForm.lungLocation" v-if="false"></span>
+              <a-input v-model="mForm.lungLocation" placeholder="请输入肺"></a-input>
+            </a-form-model-item>
+            <a-form-model-item label="肺叶" prop="lungLobe" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <span v-html="mForm.lobeLocation" v-if="false"></span>
+              <a-input v-model="mForm.lobeLocation" placeholder="请输入肺叶"></a-input>
+            </a-form-model-item>
+            <a-form-model-item label="大小" prop="size" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <div class="item-info-row">
+                <span v-html="mForm.diameter"></span>
+              </div>
+            </a-form-model-item>
+            <a-form-model-item label="体积" prop="size" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.noduleSize" placeholder="请输入结节体积" suffix="mm³" v-if="false"></a-input>
+              <span v-html="mForm.noduleSize + ' mm³'"></span>
+            </a-form-model-item>
+            <a-form-model-item label="形态类型" prop="featureLabel" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-select v-model="mForm.featureLabel" placeholder="请选择形态类型">
+                <a-select-option v-for="item in featureLabelOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </a-select-option>
+              </a-select>
+            </a-form-model-item>
+            <a-form-model-item label="标准直径" prop="diameter" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.diameterNorm" placeholder="请输入标准直径" suffix="mm" v-if="false"></a-input>
+              <span v-html="mForm.diameterNorm + ' mm'"></span>
+            </a-form-model-item>
+            <a-form-model-item label="恶性风险" prop="scrynMaligant" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.scrynMaligant" placeholder="请输入风险系数" suffix="%"></a-input>
+            </a-form-model-item>
+            <a-form-model-item label="中心密度" prop="centerDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.centerHu" placeholder="请输入中心密度" suffix="HU" v-if="false"></a-input>
+              <span v-html="mForm.centerHu + ' HU'"></span>
+            </a-form-model-item>
+            <a-form-model-item label="平均密度" prop="avgDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.meanHu" placeholder="请输入平均密度" suffix="HU" v-if="false"></a-input>
+              <span v-html="mForm.meanHu + ' HU'"></span>
+            </a-form-model-item>
+            <a-form-model-item label="最大密度" prop="maxDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.maxHu" placeholder="请输入最大密度" suffix="HU" v-if="false"></a-input>
+              <span v-html="mForm.maxHu + ' HU'"></span>
+            </a-form-model-item>
+            <a-form-model-item label="最小密度" prop="minDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
+              <a-input v-model="mForm.minHu" placeholder="请输入最小密度" suffix="HU" v-if="false"></a-input>
+              <span v-html="mForm.minHu + ' HU'"></span>
+            </a-form-model-item>
+          </a-form-model>
         </div>
-        <a-form-model ref="editFrom" :model="mForm" :rules="validatorRules" slot="detail">
-          <a-form-model-item label="肺" prop="lung" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.lungLocation" placeholder="请选择"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="肺叶" prop="lungLobe" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.lobeLocation" placeholder="请输入肺叶"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="大小" prop="size" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <div class="item-info-row">
-              <a-input v-model="mForm.sizeW" placeholder="请输入" suffix="mm"></a-input>
-              *
-              <a-input v-model="mForm.sizeH" placeholder="请输入" suffix="mm"></a-input>
-            </div>
-          </a-form-model-item>
-          <a-form-model-item label="体积" prop="size" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.noduleSize" placeholder="请输入结节体积" suffix="mm³"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="形态类型" prop="shape" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.featureLabel" placeholder="请选择形态类型"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="标准直径" prop="diameter" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.diameterNorm" placeholder="请输入标准直径" suffix="mm"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="恶性风险" prop="risk" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.scrynMaligant" placeholder="请输入风险系数" suffix="%"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="中心密度" prop="centerDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.centerHu" placeholder="请输入中心密度" suffix="HU"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="平均密度" prop="avgDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.meanHu" placeholder="请输入平均密度" suffix="HU"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="最大密度" prop="maxDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.maxHu" placeholder="请输入最大密度" suffix="HU"></a-input>
-          </a-form-model-item>
-          <a-form-model-item label="最小密度" prop="minDensity" :labelCol="labelCol" :wrapperCol="wrapperCol" class="item-info-row">
-            <a-input v-model="mForm.minHu" placeholder="请输入最小密度" suffix="HU"></a-input>
-          </a-form-model-item>
-        </a-form-model>
-      </div>
     </div>
     </a-spin>
   </a-modal>
@@ -128,6 +147,7 @@
 import { httpAction, getAction } from '@/api/manage'
 import DicomInfo from './template/components/dicom-info'
 import DicomImage from './template/components/dicomImage'
+import { Patient, singature } from './template/resource/constant'
 export default {
   name: 'sampleReportDetail',
   components: {
@@ -139,7 +159,7 @@ export default {
     return {
       labelCol: {
         xs: { span: 24 },
-        sm: { span: 6 },
+        sm: { span: 7 },
       },
       wrapperCol: {
         xs: { span: 24 },
@@ -183,22 +203,13 @@ export default {
         }
       ],
       patientInfo: {
-        name: '曹湧',
-        age: '52',
-        sampleCode: 'P02LA336',
-        sex: '女',
-        patientId: 'PCT0002145',
-        sendDoctor: '张伞',
-        clinical: '肺结节',
-        sendAgency: '山东省胸科医院',
         sendDate: '20210915',
         detectionMethod: '血液蛋白组学/代谢组学，以及医学影像等多组学技术'
       },
-      singature: {
-        Inspector: '杨清婷',
-        Reviewer: '夏文军',
-        reportDate: '2021年9月22日'
-      },
+      Inspector: singature.Inspector,
+      Reviewer: singature.Reviewer,
+      clinical: Patient.clinical,
+      detectionMethod: Patient.detectionMethod,
       dicomResult: {},
       report: {},
       ModifyVisible: false,
@@ -207,42 +218,51 @@ export default {
       },
       url: {
         edit: '/report/sampleReportHistory/edit',
-        queryById: '/report/sampleReportHistory/queryById'
+        queryById: '/report/sampleReportHistory/queryById',
+        getPatient: '/multiomics/productOrder/orderStepInfo'
       },
       validatorRules: {
         lungLocation: [{ required: true, message: '请选择肺!' }],
         lobeLocation: [{ required: true, message: '请输入肺叶!' }],
-        diameter: [{ required: true, message: '请输入大小!' }],
-        noduleSize: [
-          { required: true, message: '请输入体积!' },
-          { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
-        ],
+        // diameter: [{ required: true, message: '请输入大小!' }],
+        // noduleSize: [
+        //   { required: true, message: '请输入体积!' },
+        //   { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
+        // ],
         featureLabel: [{ required: true, message: '请选择形态类型!' }],
         scrynMaligant: [{ required: true, message: '请输入风险!' }],
-        diameterNorm: [
-          { required: true, message: '请输入直径!' },
-          { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
-        ],
-        centerHu: [
-          { required: true, message: '请输入中心密度!' },
-          { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
-        ],
-        meanHu: [
-          { required: true, message: '请输入平均密度!' },
-          { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
-        ],
-        maxHu: [
-          { required: true, message: '请输入最大密度!' },
-          { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
-        ],
-        minHu: [
-          { required: true, message: '请输入最小密度!' },
-          { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
-        ]
+        // diameterNorm: [
+        //   { required: true, message: '请输入直径!' },
+        //   { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
+        // ],
+        // centerHu: [
+        //   { required: true, message: '请输入中心密度!' },
+        //   { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
+        // ],
+        // meanHu: [
+        //   { required: true, message: '请输入平均密度!' },
+        //   { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
+        // ],
+        // maxHu: [
+        //   { required: true, message: '请输入最大密度!' },
+        //   { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
+        // ],
+        // minHu: [
+        //   { required: true, message: '请输入最小密度!' },
+        //   { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},
+        // ]
       },
       currImage: null,
       confirmLoading: false,
-      modelTitle: ''
+      modelTitle: '',
+      featureLabelOption: [
+        { label: '肺内实性', value: '肺内实性' },
+        { label: '部分实性', value: '部分实性' },
+        { label: '磨玻璃', value: '磨玻璃' },
+        { label: '肺内钙化', value: '肺内钙化' },
+        { label: '胸膜实性', value: '胸膜实性' },
+        { label: '胸膜钙化', value: '胸膜钙化' }
+      ]
     }
   },
   filters: {
@@ -271,12 +291,8 @@ export default {
     handleEditImage (image) {
       const { diameter } = image
       const { dicomResult } = this
-      let sizeArr = diameter.split('*')
-      const sizeW = sizeArr[0].substring(0, sizeArr[0].length - 2)
-      const sizeH = sizeArr[1].substring(0, sizeArr[0].length - 2)
       this.mForm = image
-      this.mForm.sizeW = sizeW
-      this.mForm.sizeH = sizeH
+      this.mForm.scrynMaligant = this.mForm.scrynMaligant.replace('%', '')
       this.currImage = image
       this.ModifyVisible = true
     },
@@ -288,7 +304,7 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk: () => {
-          this.dicomResult.imageList.splice(index, 1)
+          this.dicomResult.nodulesList.splice(index, 1)
         },
         onCancel() {
           console.log('Cancel');
@@ -299,6 +315,8 @@ export default {
       this.commitComplete()
     },
     async commitComplete () {
+      const id = this.$route.params.id
+      const that = this
       that.confirmLoading = true
       let httpurl = that.url.edit
       let method = 'put'
@@ -326,9 +344,11 @@ export default {
         }
         const res = await getAction(url, postData)
         if (res.code === 200) {
-          this.report = res.result
+          this.report = res.result.reportInfo
           this.dicomResult = JSON.parse(this.report.imageReportAll)
           this.modelTitle = `窗宽：${this.dicomResult.windowing}  窗位： ${this.dicomResult.windowLevel}`
+          this.patientInfo = res.result
+          this.patientInfo.sex = res.result.sex ? (res.result.sex === '0' ? '女' : '男') : '-'
         } else {
           this.$message.error(res.message)
         }
@@ -337,7 +357,7 @@ export default {
       }
     },
     handleOk () {
-      this.mForm.diameter = this.mForm.sizeW + 'mm *' + this.mForm.sizeH + 'mm'
+      this.mForm.scrynMaligant = this.mForm.scrynMaligant
       const id = this.$route.params.id
       const that = this
       this.$refs.editFrom.validate(valid => {
@@ -349,141 +369,51 @@ export default {
         }
       })
     },
-
+    async getPatient(id, step) {
+      const url = this.url.getPatient
+      try {
+        const postData = {
+          orderId: id,
+          step: step
+        }
+        const res = await getAction(url, postData)
+        if (res.code === 200) {
+          if (step === 0) {
+            const { caseName, age, sendHospital, sendDoctor, liveHospitalNumber, gender_dictText } = res.result
+            this.patientInfo.name = caseName
+            this.patientInfo.age = age
+            this.patientInfo.sendAgency = sendHospital
+            this.patientInfo.sendDoctor = sendDoctor
+            this.patientInfo.sex = gender_dictText
+            this.patientInfo.patientId = liveHospitalNumber
+          } else if (step === 1)  {
+            const { medicalCaseCode } = res.result
+            this.patientInfo.sampleCode = medicalCaseCode
+          }
+          //   <a-descriptions-item label="临床诊断">{{patientInfo.clinical}}</a-descriptions-item>
+          //   <a-descriptions-item label="送检日期">{{patientInfo.sendDate}}</a-descriptions-item>
+        } else {
+          this.$message.error(res.message)
+        }
+      } catch (e) {
+        this.$message.warning(e.message)
+      }
+    },
+    calcMaligant(value) {
+      let retValue = false
+      try {
+        const numberValue = value.replace('%', '')
+        retValue = parseFloat(numberValue) > 60 ? true : false
+      } catch (e) {
+        console.log(e)
+      }
+      return retValue
+    }
   }
 }
 </script>
 <style lang="less">
-  .report-detail {
-    .title {
-      color: rgba(0, 0, 0, .85);
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
-
-    .status-label {
-      width: 100px;
-      text-align: center;
-      font-size: 13px;
-      line-height: 32px;
-      background: #dc5f0d;
-      position: absolute;
-      right: 0;
-      top: 0;
-      z-Index: 2;
-      padding: 0 2em;
-      -webkit-transform-origin: left bottom;
-      -moz-transform-origin: left bottom;
-      transform-origin: left bottom;
-      -webkit-transform: translate(29.29%, -100%) rotate(45deg);
-      -moz-transform: translate(29.29%, -100%) rotate(45deg);
-      transform: translate(29.29%, -100%) rotate(45deg);
-      text-indent: 0;
-
-      &.low-risk {
-        background: #5fb679;
-      }
-
-      &.hight-risk {
-        background: #fe0100;
-      }
-    }
-  }
-  .report-result {
-    position: relative;
-    overflow: hidden;
-    height: 75px;
-  }
-
-  .image-result {
-    position: relative;
-    &-list {
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    &-item {
-      min-height: 45px;
-      flex: 0 0 50%;
-
-      &__content {
-        position: relative;
-        border: 2px solid transparent;
-      }
-
-      padding-right: 30px;
-      margin-bottom: 30px;
-
-      &:hover, &:active {
-        .edit-toolbar {
-          display: block;
-        }
-      }
-
-      .ant-card {
-        border: 2px solid #e8e8e8;
-
-        &.hight-risk {
-          border-color: #fe0100;
-        }
-      }
-    }
-
-    .item-content-image {
-      flex: 2;
-
-      .result-image {
-        max-width: 100%;
-      }
-    }
-
-    .item-content-info {
-      flex: 1;
-      padding: 15px;
-    }
-
-    .edit-toolbar {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      display: none;
-    }
-    .edit-toolbar-save {
-      position: absolute;
-      top: -45px;
-      right: 30px;
-    }
-  }
-
-  .item-info-row {
-    margin-bottom: 10px;
-
-    > label {
-      font-weight: bold;
-      margin-right: 10px;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
   .result-image {
     max-width: 100%;
-  }
-  .ant-modal-body {
-    .image-result {
-      display: flex;
-
-      .result-image {
-        margin-top: 45px;
-      }
-    }
-
-    .item-info-row {
-      display: flex;
-      align-items: center;
-    }
   }
 </style>

@@ -28,8 +28,8 @@ export const AllCells = {
   ...mapCell(JVXETypes.inputNumber, JVxeInputCell),
   ...mapCell(JVXETypes.checkbox, JVxeCheckboxCell),
   ...mapCell(JVXETypes.select, JVxeSelectCell),
-  ...mapCell(JVXETypes.selectSearch, JVxeSelectCell), // 下拉搜索
-  ...mapCell(JVXETypes.selectMultiple, JVxeSelectCell), // 下拉多选
+  ...mapCell(JVXETypes.selectSearch, JVxeSelectCell),  // 下拉搜索
+  ...mapCell(JVXETypes.selectMultiple, JVxeSelectCell),  // 下拉多选
   ...mapCell(JVXETypes.date, JVxeDateCell),
   ...mapCell(JVXETypes.datetime, JVxeDateCell),
   ...mapCell(JVXETypes.upload, JVxeUploadCell),
@@ -41,7 +41,7 @@ export const AllCells = {
   ...mapCell(JVXETypes.rowDragSort, JVxeDragSortCell),
   ...mapCell(JVXETypes.slot, JVxeSlotCell),
   ...mapCell(JVXETypes.departSelect, JVxeDepartSelectCell),
-  ...mapCell(JVXETypes.userSelect, JVxeUserSelectCell),
+  ...mapCell(JVXETypes.userSelect, JVxeUserSelectCell)
 
   /* hidden 是特殊的组件，不在这里注册 */
 }

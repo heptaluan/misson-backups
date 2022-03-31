@@ -25,11 +25,7 @@
           <a-col class="group">
             <a-form-item label="状态" :labelCol="{ span: 4 }">
               <a-select style="width:200px;" allowClear v-model="queryParam.state" placeholder="请选择产品状态">
-                <a-select-option
-                  v-for="item in productStatus"
-                  :key="item.key"
-                  :value="item.key"
-                >
+                <a-select-option v-for="item in productStatus" :key="item.key" :value="item.key">
                   {{ item.value }}
                 </a-select-option>
               </a-select>
@@ -77,9 +73,9 @@
       @change="handleTableChange"
     >
       <template slot="state" slot-scope="text, record">
-        <div v-for="item in productStatus">
+        <div v-for="item in productStatus" :key="item.key">
           <div v-if="record.state === item.key">
-            {{item.value}}
+            {{ item.value }}
           </div>
         </div>
       </template>
@@ -223,8 +219,8 @@ export default {
       superFieldList: [],
       productInfoList: [],
       productStatus: [
-        {key: 0, value: '停用'},
-        {key: 1, value: '启用'},
+        { key: 0, value: '停用' },
+        { key: 1, value: '启用' }
       ]
     }
   },

@@ -4,21 +4,45 @@
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
         <a-row :gutter="24" class="search-group">
-          <a-col class="group">
+          <a-col class="group md">
             <a-form-item label="渠道商名称">
-              <a-input allowClear v-model="queryParam.accessName" placeholder="请输入渠道商名称"></a-input>
+              <a-select
+                v-model="queryParam.departName"
+                placeholder="请输入渠道商名称"
+                show-search
+                :value="channelValue"
+                :default-active-first-option="false"
+                :filter-option="false"
+                :not-found-content="null"
+                @search="handleChannelSearch"
+                @change="handleChannelChange"
+              >
+                <a-select-option v-for="item in distributorList" :key="item.id" :value="item.departNameAbbr">
+                  {{ item.departName }}
+                </a-select-option>
+              </a-select>
             </a-form-item>
           </a-col>
           <a-col class="group">
             <a-form-item label="联系人电话">
-              <a-input allowClear v-model="queryParam.contactPhone" placeholder="请输入联系人电话"></a-input>
+              <a-input allowClear v-model="queryParam.mobile" placeholder="请输入联系人电话"></a-input>
             </a-form-item>
           </a-col>
-<!--          <div class="group">-->
-<!--            <a-form-model-item label="地区" prop="address">-->
-<!--              <a-cascader :options="options" placeholder="请选择地区" v-model="queryParam.provinceCode" />-->
-<!--            </a-form-model-item>-->
-<!--          </div>-->
+          <a-col class="group oneLine"></a-col>
+          <a-col class="group">
+            <a-form-item label="地区">
+              <a-radio-group v-model="queryParam.regionProvince">
+                <a-radio-button :value="item.code" v-for="item in regionOptions" :key="item.code">
+                  {{ item.name }}
+                </a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <!--          <div class="group">-->
+          <!--            <a-form-model-item label="地区" prop="address">-->
+          <!--              <a-cascader :options="options" placeholder="请选择地区" v-model="queryParam.provinceCode" />-->
+          <!--            </a-form-model-item>-->
+          <!--          </div>-->
           <!-- <div class="group">
             <div class="title">销售：</div>
             <a-select
@@ -49,7 +73,9 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button @click="handleShowDistributorModal" type="primary" icon="plus" v-has="'channelCreate'">创建渠道商</a-button>
+      <a-button @click="handleShowDistributorModal" type="primary" icon="plus" v-has="'channelCreate'"
+        >创建渠道商</a-button
+      >
       <!-- <a-button type="primary" icon="download" @click="handleExportXls('型号管理')">导出</a-button>
       <a-upload
         name="file"
@@ -119,7 +145,8 @@
         </template>
 
         <span slot="action" slot-scope="text, record" style="display: flex;justify-content: space-evenly;">
-          <a @click="handleShowDistributorModal(record)">查看详情</a>
+          <a @click="handleShowDistributorModal(record, false)">查看详情</a>
+          <a @click="handleShowDistributorModal(record, true)">编辑</a>
           <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)" v-has="'channelCreate'">
             <a>删除</a>
           </a-popconfirm>
@@ -150,9 +177,10 @@
 import '@/assets/less/TableExpand.less'
 import { mixinDevice } from '@/utils/mixin'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
 import AddDistributorModal from './modules/AddDistributorModal'
 import { queryRoleUsers } from '../../api/material/index'
-import options from '../../../src/mixins/cities'
+import { getRegionWithDepartment } from '@/api/api'
 
 function fetch(value, callback) {
   let timeout
@@ -193,7 +221,7 @@ function fetch(value, callback) {
 
 export default {
   name: 'DistributorList',
-  mixins: [JeecgListMixin, mixinDevice],
+  mixins: [JeecgListMixin, mixinDevice, selectorFilterMixin],
   components: {
     AddDistributorModal
   },
@@ -214,41 +242,40 @@ export default {
         {
           title: '渠道商名称',
           align: 'center',
-          dataIndex: 'accessName'
+          dataIndex: 'departName'
         },
         {
           title: '缩写',
           align: 'center',
-          dataIndex: 'shortName'
+          dataIndex: 'departNameAbbr'
         },
-        {
-          title: '渠道商联系人',
-          align: 'center',
-          dataIndex: 'contactName'
-        },
+        // {
+        //   title: '渠道商联系人',
+        //   align: 'center',
+        //   dataIndex: 'contactName'
+        // },
         {
           title: '联系人电话',
           align: 'center',
-          dataIndex: 'contactPhone'
+          dataIndex: 'mobile'
         },
         {
-          title: '地址',
+          title: '地区',
           align: 'center',
-          dataIndex: 'provinceCode',
+          dataIndex: 'zone',
           customRender: function(t, r, index) {
-            let address = ''
-            if (t.districtCode) {
-              address = r.provinceCode + '-' + r.cityCode + '-' + r.districtCode
-            } else {
-              address = r.provinceCode + '-' + r.cityCode
-            }
-            return address
+            return r.regionProvince_dictText + '/' + r.regionCity_dictText + '/' + r.regionCode_dictText
           }
+        },
+        {
+          title: '详细地址',
+          align: 'center',
+          dataIndex: 'address'
         },
         {
           title: '关联销售',
           align: 'center',
-          dataIndex: 'sellUser_dictText'
+          dataIndex: 'chargeUsers_dictText'
         },
         {
           title: '创建人',
@@ -270,6 +297,7 @@ export default {
         }
       ],
       url: {
+        relatedList: '/sys/user/departUserList',
         list: 'mission/businessAccess/list',
         delete: 'mission/businessAccess/delete'
       },
@@ -278,7 +306,9 @@ export default {
       queryParam: {},
       data: [],
       value: undefined,
-      options: options
+      distributorList: [],
+      channelValue: undefined,
+      regionOptions: null
     }
   },
   created() {
@@ -301,11 +331,24 @@ export default {
       this.queryParam = {}
       this.loadData()
     },
-    handleShowDistributorModal(record) {
-      this.$refs.modalForm.edit(record)
+    handleShowDistributorModal(record, isEdit) {
+      this.$refs.modalForm.edit(record, isEdit)
       if (!record.id) {
         this.$refs.modalForm.title = '新增'
       }
+    },
+    loadRelatedRegion() {
+      const regionOfHospital = { dpCatalog: 3000, level: 1 }
+      getRegionWithDepartment(regionOfHospital).then(res => {
+        this.regionOptions = res.result
+      })
+    },
+    modalFormOk() {
+      // 新增/修改 成功时，重载列表
+      this.loadData()
+      //清空列表选中
+      this.onClearSelected()
+      this.loadRelatedRegion()
     },
     handleSearch(value) {
       fetch(value, data => (this.data = data))
@@ -315,6 +358,10 @@ export default {
       this.value = value
       fetch(value, data => (this.data = data))
     }
+  },
+  mounted() {
+    this.loadDistributorList()
+    this.loadRelatedRegion()
   }
 }
 </script>
@@ -332,7 +379,6 @@ export default {
     justify-items: center;
     align-items: center;
     margin-right: 15px;
-
     .title {
       color: rgba(0, 0, 0, 0.85);
       margin-right: 10px;
@@ -346,6 +392,20 @@ export default {
       margin-right: 10px;
       text-align: right;
       min-width: 45px;
+    }
+
+    /deep/ .ant-form-item-control {
+      height: auto;
+
+      .ant-radio-button-wrapper {
+        margin: 0 8px 8px 0;
+        border-radius: 4px !important;
+        border-left: 1px solid #d9d9d9;
+
+        &::before {
+          display: none !important;
+        }
+      }
     }
   }
 

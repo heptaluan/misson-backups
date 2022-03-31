@@ -20,7 +20,7 @@ for (let i = 0; i < 10; i++) {
     // x: moment(new Date(beginDay + 1000 * 60 * 60 * 24 * i)).format('YYYY-MM-DD'),
     // y: Math.round(Math.random() * 10)
     x: 0,
-    y: 0,
+    y: 0
   })
 }
 
@@ -29,32 +29,32 @@ export default {
   props: {
     dataSource: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     // x 轴别名
     x: {
       type: String,
-      default: 'x',
+      default: 'x'
     },
     // y 轴别名
     y: {
       type: String,
-      default: 'y',
-    },
+      default: 'y'
+    }
   },
   data() {
     return {
       data: [],
-      height: 100,
+      height: 100
     }
   },
   computed: {
     scale() {
       return [
         { dataKey: 'x', title: this.x, alias: this.x },
-        { dataKey: 'y', title: this.y, alias: this.y },
+        { dataKey: 'y', title: this.y, alias: this.y }
       ]
-    },
+    }
   },
   created() {
     if (this.dataSource.length === 0) {
@@ -62,7 +62,7 @@ export default {
     } else {
       this.data = this.dataSource
     }
-  },
+  }
 }
 </script>
 

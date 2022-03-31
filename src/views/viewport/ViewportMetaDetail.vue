@@ -14,7 +14,7 @@ export default {
   name: 'ViewportMetaDetail',
   methods: {
     widthHeight() {
-      this.iframeHeight = window.innerHeight - 140
+      this.iframeHeight = window.innerHeight
       this.iframeWidth = window.innerWidth - 56 - document.querySelector('.ant-layout-sider').clientWidth
     },
     listenNodeChange() {
@@ -48,8 +48,9 @@ export default {
     this.listenNodeChange()
   },
   created() {
-    // this.iframeUrl = `http://localhost:3000/viewer/1?resource=${this.$route.query.resource}&token=${this.token}&url=${Vue.prototype.API_BASE_URL}&type=${this.$route.query.type}`
-    this.iframeUrl = `http://ct.ananpan.com/viewer/1?resource=${this.$route.query.resource}&token=${this.token}&url=${Vue.prototype.API_BASE_URL}&type=${this.$route.query.type}`
+    // this.iframeUrl = `http://192.168.11.164:3000/viewer/1?resource=${this.$route.query.resource}&token=${this.token}&url=${Vue.prototype.API_BASE_URL}&page=image`
+    this.iframeUrl = `https://ct.ananpan.com/viewer/1?resource=${this.$route.query.resource}&token=${this.token}&url=${Vue.prototype.API_BASE_URL}&page=image`
+    // this.iframeUrl = `https://yyds.ananpan.com/viewport/viewer/1?resource=${this.$route.query.resource}&token=${this.token}&url=${Vue.prototype.API_BASE_URL}&page=image`
   }
 }
 </script>

@@ -16,12 +16,12 @@
           <a-row :gutter="24" class="search-group">
             <a-col class="group" :labelCol="{ span: 6 }">
               <a-form-item label="耗材编码">
-                <a-input allowClear v-model="queryParam.materialCode" placeholder="请输入耗材编码"></a-input>
+                <a-input v-model="queryParam.materialCode" placeholder="请输入耗材编码"></a-input>
               </a-form-item>
             </a-col>
             <a-col class="group" :labelCol="{ span: 6 }">
               <a-form-item label="耗材名称">
-                <a-input allowClear v-model="queryParam.materialName" placeholder="请输入耗材名称"></a-input>
+                <a-input v-model="queryParam.materialName" placeholder="请输入耗材名称"></a-input>
               </a-form-item>
             </a-col>
             <a-col class="group btn">
@@ -35,12 +35,12 @@
 
       <!-- table区域-begin -->
       <div>
-        <div class="ant-alert ant-alert-info" style="margin-bottom: 16px;">
+        <!-- <div class="ant-alert ant-alert-info" style="margin-bottom: 16px;">
           <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择
           <a style="font-weight: 600">{{ selectedRowKeys.length }}</a
           >项
           <a style="margin-left: 24px" @click="onClearSelected">清空</a>
-        </div>
+        </div> -->
 
         <a-table
           ref="table"
@@ -52,7 +52,7 @@
           :dataSource="dataSource"
           :pagination="ipagination"
           :loading="loading"
-          :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+          :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange, onSelect: onSelect }"
           class="j-table-force-nowrap"
           @change="handleTableChange"
         >
@@ -137,7 +137,9 @@ export default {
         showQuickJumper: true,
         showSizeChanger: true,
         total: 0
-      }
+      },
+      selectedRowKeys: [],
+      selectedRows: []
     }
   },
   methods: {
@@ -145,13 +147,18 @@ export default {
       this.type = type
       this.loadMaterialList(type)
       this.visible = true
+      this.selectedRowKeys = []
+      this.selectedRows = []
+      this.ipagination.current = 1
     },
     handleCancel() {
       console.log(`取消`)
       this.visible = false
+      this.ipagination.current = 1
+      this.queryParam = {}
     },
     handleOk() {
-      this.$emit('ok', this.selectionRows)
+      this.$emit('ok', this.selectedRows)
       this.visible = false
     },
     handleAddMaterial() {},
@@ -162,7 +169,7 @@ export default {
     },
     loadMaterialList(type) {
       const that = this
-      const params = this.getQueryParams()
+      const params = this.getQueryParams(true)
       const product = {
         product: [type],
         page: that.ipagination.current,
@@ -188,6 +195,21 @@ export default {
     searchQuery() {
       this.ipagination.current = 1
       this.loadMaterialList(this.type)
+    },
+    onSelect(record, selected, selectedRows) {
+      if (selected) {
+        this.selectedRows.push(record)
+      }
+
+      if (!selected) {
+        let delIndex = this.selectedRows.findIndex(val => {
+          return val.id === record.id
+        })
+        this.selectedRows.splice(delIndex, 1)
+      }
+    },
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
     }
   }
 }

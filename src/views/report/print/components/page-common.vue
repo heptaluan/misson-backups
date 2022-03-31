@@ -1,7 +1,7 @@
 /* 包含标题、页尾的容器 */
 <template>
   <div class="page">
-    <div class="page-common__index" v-if="calPageIndex && !pageConfig.isNoFooter">{{calPageIndex}}</div>
+    <div class="page-common__index" v-if="false">{{calPageIndex}}</div>
     <div class="page-common">
       <div class="page-common__title" v-if="!noTitle">
           <div class="page-common__title__rect">
@@ -11,7 +11,7 @@
       <slot></slot>
     </div>
     <div v-if="!pageConfig.isNoFooter" class="page-common__footer">
-<!--      免责声明：本报告仅针对您本次送检的样本。-->
+      {{calPageIndex}}
     </div>
   </div>
 </template>
@@ -146,10 +146,10 @@ export default {
     bottom: @bottom;
     left: 50%;
     transform: translate(-50%);
-    font-size: 10.8px;
+    font-size: 14px;
     display: flex;
     justify-content: center;
-    color: #BEBEBE;
+    color: @colorP;
     background: #ffffff;
     z-index: 0;
   }

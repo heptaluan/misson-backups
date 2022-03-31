@@ -58,44 +58,7 @@
     },
     methods: {
       init () {
-        this.dicomResult.imageList = []
-        const random = (max) =>{
-          return Math.floor(Math.random() * max)
-        }
-        const randomFix = (max, min) =>{
-          const _random = Math.floor(Math.random() * max * 100 + min * 100) / 100
-
-          return _random
-        }
-        const getShape = ()=> {
-          const shapeArr = ['胸膜钙化', '磨玻璃', '肺内实性']
-          const index = Math.floor(Math.random() * 3)
-          return shapeArr[index]
-        }
-        for (let i = 0; i < this.dicomResult.total; i++) {
-          const _random = random(50) + 20
-          const pn = _random % 2 === 0 ? 1 : -1
-          const result = {
-            index: i + 1,
-            iamgeNumber: _random + i,
-            risk: _random,
-            url: require('./resource/dicom_result.png'),
-            diameter: random(1000) / 100,
-            minDensity: pn *(randomFix(100, 100)),
-            maxDensity: pn *(randomFix(300,700)),
-            avgDensity: pn *(randomFix(200, 500)),
-            centerDensity: pn *(randomFix(100, 500)),
-            shape: getShape(),
-            size:  randomFix(10) + '*' + randomFix(10),
-            lung: pn > 0 ? '左肺' : '右肺',
-            lungLobe: pn > 0 ? '上肺叶' : '下肺叶'
-          }
-          this.dicomResult.imageList.push(result)
-        }
       }
     }
   }
 </script>
-<style lang="less">
-  @import "../less/preview.less";
-</style>

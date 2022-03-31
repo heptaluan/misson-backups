@@ -3,30 +3,98 @@
     <!-- 查询区域 -->
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
-        <a-row :gutter="24">
-          <a-col :xl="6" :lg="7" :md="8" :sm="24">
-            <a-form-item label="订单编号">
-              <a-input placeholder="请输入订单编号" v-model="queryParam.orderId"></a-input>
+        <a-row :gutter="24" class="search-group">
+          <a-col class="group md">
+            <a-form-item label="渠道商:" :labelCol="{ span: 6 }">
+              <a-select
+                v-model="queryParam.sendAccess"
+                placeholder="请选择渠道商"
+                allowClear
+                show-search
+                :default-active-first-option="false"
+                :filter-option="false"
+                :not-found-content="null"
+                @search="handleChannelSearch"
+                @change="handleChannelChange"
+              >
+                <a-select-option v-for="item in distributorList" :key="item.id" :value="item.departNameAbbr">
+                  {{ item.departName }}
+                </a-select-option>
+              </a-select>
             </a-form-item>
           </a-col>
-          <a-col :xl="6" :lg="7" :md="8" :sm="24">
-            <a-form-item label="报告时间">
-              <j-date placeholder="请选择报告时间" v-model="queryParam.resultTime"></j-date>
+          <a-col class="group md">
+            <a-form-item label="医院:" :labelCol="{ span: 6 }">
+              <a-select v-model="queryParam.sendHospital" placeholder="请选择医院">
+                <a-select-option v-for="item in hospitalList" :key="item.id" :value="item.departNameAbbr">
+                  {{ item.departName }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col class="group sm">
+            <a-form-item label="病例编号:" :labelCol="{ span: 6 }">
+              <a-input allowClear v-model="queryParam.orderCode" placeholder="请输入病例编号"></a-input>
+            </a-form-item>
+          </a-col>
+          <a-col class="group sm">
+            <a-form-item label="姓名:" :labelCol="{ span: 6 }">
+              <a-input allowClear v-model="queryParam.name" placeholder="请输入姓名"></a-input>
+            </a-form-item>
+          </a-col>
+          <a-col class="group sm">
+            <a-form-item label="产品">
+              <a-select v-model="queryParam.choseProduct" placeholder="请选择产品类型" allowClear>
+                <a-select-option v-for="item in productOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col class="group tiny">
+            <a-form-item label="性别:" :labelCol="{ span: 6 }">
+              <a-select v-model="queryParam.sex" placeholder="请选择性别" allowClear>
+                <a-select-option v-for="item in genderOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col class="group md">
+            <a-form-item label="报告时间" :labelCol="{ span: 5 }">
+              <j-date
+                v-model="queryParam.createTime_begin"
+                :showTime="true"
+                date-format="YYYY-MM-DD"
+                placeholder="请选择开始时间"
+              ></j-date>
+              <span style="width: 20px;"> - </span>
+              <j-date
+                v-model="queryParam.createTime_end"
+                :showTime="true"
+                date-format="YYYY-MM-DD"
+                placeholder="请选择结束时间"
+              ></j-date>
+            </a-form-item>
+          </a-col>
+          <a-col class="group sm">
+            <a-form-item label="身份证:" :labelCol="{ span: 6 }">
+              <a-input allowClear v-model="queryParam.idCard" placeholder="请输入身份证"></a-input>
+            </a-form-item>
+          </a-col>
+          <a-col class="group sm">
+            <a-form-item label="订单编号:" :labelCol="{ span: 6 }">
+              <a-input allowClear v-model="queryParam.orderId" placeholder="请输入订单编号"></a-input>
             </a-form-item>
           </a-col>
           <template v-if="toggleSearchStatus">
-            <a-col :xl="6" :lg="7" :md="8" :sm="24">
-              <a-form-item label="报告状态">
-                <a-input placeholder="请选择报告状态" v-model="queryParam.reportType"></a-input>
-              </a-form-item>
-            </a-col>
-            <a-col :xl="6" :lg="7" :md="8" :sm="24">
-              <a-form-item label="审核人">
-                <a-input placeholder="请输入审核人" v-model="queryParam.checkerName"></a-input>
+            <a-col class="group sm">
+              <a-form-item label="手机号:" :labelCol="{ span: 6 }">
+                <a-input allowClear v-model="queryParam.phone" placeholder="请输入手机号"></a-input>
               </a-form-item>
             </a-col>
           </template>
-          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+          <a-col class="group sm">
             <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
               <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
@@ -81,6 +149,15 @@
         <template slot="htmlSlot" slot-scope="text">
           <div v-html="text"></div>
         </template>
+        <template slot="colorText" slot-scope="text">
+          <span v-html="text" :style="calcStyle(text)"></span>
+        </template>
+        <template slot="colorTextImage" slot-scope="text">
+          <span v-html="text" :style="calcStyleImage(text)"></span>
+        </template>
+        <template slot="geneColorText" slot-scope="text, record">
+          <span v-html="geneText(text, record)" :style="calcStyleImage(text)"></span>
+        </template>
         <template slot="imgSlot" slot-scope="text">
           <span v-if="!text" style="font-size: 12px;font-style: italic;">无图片</span>
           <img
@@ -97,7 +174,6 @@
             下载
           </a-button>
         </template>
-
         <span slot="action" slot-scope="text, record">
           <a @click="handleDetail(record)">详情</a>
 <!--           <a-divider type="vertical" />-->
@@ -128,14 +204,12 @@
 import '@/assets/less/TableExpand.less'
 import { mixinDevice } from '@/utils/mixin'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
-import SampleReportSourceModal from './modules/SampleReportSourceModal'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
+import { reportMixin } from '@/mixins/reportMixin'
 
 export default {
   name: 'SampleReportSourceList',
-  mixins: [JeecgListMixin, mixinDevice],
-  components: {
-    SampleReportSourceModal
-  },
+  mixins: [JeecgListMixin, mixinDevice, selectorFilterMixin, reportMixin],
   data() {
     return {
       description: '初始报告结果管理页面',
@@ -152,29 +226,77 @@ export default {
           }
         },
         {
-          title: '订单编号',
+          title: '渠道商',
           align: 'center',
-          dataIndex: 'orderId'
+          dataIndex: 'sendAccess_dictText'
+        },
+        {
+          title: '医院',
+          align: 'center',
+          dataIndex: 'sendHospital_dictText'
+        },
+        {
+          title: '姓名',
+          align: 'center',
+          dataIndex: 'name'
+        },
+        {
+          title: '年龄',
+          align: 'center',
+          dataIndex: 'age'
+        },
+        {
+          title: '性别',
+          align: 'center',
+          dataIndex: 'sex',
+          customRender: function(t, r, index) {
+            let text = '-'
+            if (t === '0') {
+              text = '女'
+            }
+            if (t === '1') {
+              text = '男'
+            }
+            return text
+          }
+        },
+        {
+          title: '身份证',
+          align: 'center',
+          dataIndex: 'idCard'
         },
         {
           title: '代谢结果',
           align: 'center',
-          dataIndex: 'ananpanReportValue'
+          dataIndex: 'ananpanReportValue',
+          key: 'ananpanReportValue',
+          scopedSlots: { customRender: 'colorText' },
         },
         {
           title: '影像结果',
           align: 'center',
-          dataIndex: 'imageReportValue'
+          dataIndex: 'imageReportValue',
+          key: 'imageReportValue',
+          scopedSlots: { customRender: 'colorTextImage' },
         },
         {
-          title: '基因结果',
+          title: '表观结果',
           align: 'center',
-          dataIndex: 'geneReportValue'
+          dataIndex: 'geneReportValue',
+          key: 'geneReportValue',
+          scopedSlots: { customRender: 'geneColorText' },
         },
         {
           title: '报告总结果',
           align: 'center',
-          dataIndex: 'reportValue'
+          dataIndex: 'reportValue',
+          key: 'reportValue',
+          scopedSlots: { customRender: 'colorText' },
+        },
+        {
+          title: '产品',
+          align: 'center',
+          dataIndex: 'choseProduct_dictText'
         },
         {
           title: '报告状态',
@@ -190,6 +312,16 @@ export default {
             }
             return text
           }
+        },
+        {
+          title: '订单编号',
+          align: 'center',
+          dataIndex: 'orderId'
+        },
+        {
+          title: '病例编号',
+          align: 'center',
+          dataIndex: 'orderCode'
         },
         {
           title: '备注',
@@ -213,11 +345,15 @@ export default {
         importExcelUrl: 'report/sampleReportSource/importExcel'
       },
       dictOptions: {},
-      superFieldList: []
+      superFieldList: [],
+      distributorList: [],
+      hospitalList: []
     }
   },
   created() {
     this.getSuperFieldList()
+    this.loadDistributorList()
+    this.loadHospitalList()
   },
   computed: {
     importExcelUrl: function() {
@@ -245,9 +381,17 @@ export default {
     },
     handleDetail (record) {
       // /reportDetail
-      this.$router.push({name: 'reportSourceDetail-@id', params: {
+      // this.$router.push({name: 'reportSourceDetail-@id', params: {
+      //     id: record.id
+      //   }})
+
+      const router = this.$router.resolve({
+        name: 'reportSourceDetail-@id',
+        params:{
           id: record.id
-        }})
+        }
+      })
+      window.open(router.href, '_blank')
     }
   }
 }

@@ -164,10 +164,10 @@
           param.id = this.model.id
         }
         if(value){
-          let reg=new RegExp("[`_~!@#$^&*()=|{}'.<>《》/?！￥（）—【】‘；：”“。，、？]")
-          if(reg.test(value)){
-            callback("数据值不能包含特殊字符！")
-          }else{
+          // let reg=new RegExp("[`_~!@#$^&*()=|{}'.<>《》/?！￥（）—【】‘；：”“。，、？]")
+          // if(reg.test(value)){
+          //   callback("数据值不能包含特殊字符！")
+          // }else{
             //update--begin--autor:lvdandan-----date:20201203------for：JT-27【数据字典】字典 - 数据值可重复
             getAction("/sys/dictItem/dictItemCheck",param).then((res)=>{
               if(res.success){
@@ -177,7 +177,7 @@
               }
             });
             //update--end--autor:lvdandan-----date:20201203------for：JT-27【数据字典】字典 - 数据值可重复
-          }
+          // }
         }else{
           callback()
         }

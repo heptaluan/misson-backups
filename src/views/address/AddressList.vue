@@ -34,8 +34,15 @@
     </div>
 
     <!-- 操作按钮区域 -->
-    <div class="table-operator">
-      <a-button @click="handleAdd" type="primary" icon="plus">添加地址</a-button>
+    <div class='table-operator'>
+      <a-button @click='handleAdd' type='primary' icon='plus'>添加地址</a-button>
+      <SelectorFilter ref='selectorFilter' :data-format='testFormat' v-if='false' />
+      <!--      <a-input allowClear placeholder="请输入地址详情" @click='openSelector' id='selectorFilter'></a-input>-->
+      <!--      <a-col class="group">-->
+      <!--        <a-form-item label="地址详情">-->
+      <!--          <a-input allowClear @click='openSelector' id='selectorFilter' placeholder="请输入地址详情"></a-input>-->
+      <!--        </a-form-item>-->
+      <!--      </a-col>-->
       <!-- <a-button type="primary" icon="download" @click="handleExportXls('型号管理')">导出</a-button>
       <a-upload
         name="file"
@@ -134,12 +141,14 @@ import '@/assets/less/TableExpand.less'
 import { mixinDevice } from '@/utils/mixin'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
 import AddNewAddressModal from './modules/AddNewAddressModal'
+import SelectorFilter from '../modules/SelectorFilter'
 
 export default {
   name: 'AddressList',
   mixins: [JeecgListMixin, mixinDevice],
   components: {
-    AddNewAddressModal
+    AddNewAddressModal,
+    SelectorFilter
   },
   data() {
     return {
@@ -195,11 +204,17 @@ export default {
       },
       dictOptions: {},
       superFieldList: [],
-      queryParam: {}
+      queryParam: {},
+      testFormat: {
+        id: 'id',
+        value: 'fileInfo',
+        showTxt: 'fileName'
+      }
     }
   },
   created() {
     this.getSuperFieldList()
+    this.openSelector()
   },
   computed: {
     importExcelUrl: function() {
@@ -207,7 +222,8 @@ export default {
     }
   },
   methods: {
-    initDictConfig() {},
+    initDictConfig() {
+    },
     getSuperFieldList() {
       let fieldList = []
       fieldList.push({ type: 'string', value: 'model', text: '型号', dictCode: '' })
@@ -217,6 +233,9 @@ export default {
     resetQuery() {
       this.queryParam = {}
       this.loadData()
+    },
+    openSelector() {
+      // this.$refs.selectorFilter.show();
     }
   }
 }

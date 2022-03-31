@@ -6,11 +6,7 @@
         <a-row :gutter="24" class="search-group patients-list">
           <a-col class="group">
             <a-form-item label="归档编号" :labelCol="{ span: 5 }">
-              <a-input
-                style="width:250px;"
-                v-model="queryParam.archiveJobId"
-                placeholder="请输入归档编号"
-              ></a-input>
+              <a-input style="width:250px;" v-model="queryParam.archiveJobId" placeholder="请输入归档编号"></a-input>
             </a-form-item>
           </a-col>
           <a-col class="group">

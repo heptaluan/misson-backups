@@ -15,14 +15,7 @@
           </a-col>
           <a-col class="group md">
             <a-form-item label="创建时间">
-              <j-date
-                v-model="queryParam.updateTime_begin"
-                :showTime="true"
-                date-format="YYYY-MM-DD"
-                placeholder="请选择开始时间"
-              ></j-date>
-              <span style="width: 10px;"> - </span>
-              <j-date v-model="queryParam.updateTime_end" :showTime="true" c placeholder="请选择结束时间"></j-date>
+              <a-range-picker @change='onTimeChange' allowClear v-model='queryParam.datePick' />
             </a-form-item>
           </a-col>
           <a-col class="group md">
@@ -45,10 +38,18 @@
             </a-form-item>
           </a-col>
           <a-col class="group md">
-            <a-form-item label="渠道商" prop="sendAccess" class="order-label">
-              <a-select style="width:200px;" v-model="queryParam.agencyId" placeholder="请选择渠道商">
-                <a-select-option v-for="item in distributorList" :key="item.id" :value="item.shortName">
-                  {{ item.accessName }}
+            <a-form-item label='渠道商' prop='sendAccess' class='order-label'>
+              <a-select v-model='queryParam.agencyShortName' placeholder='请选择渠道商'
+                        style='width:200px'
+                        show-search
+                        :value='channelValue'
+                        :default-active-first-option='false'
+                        :filter-option='false'
+                        :not-found-content='null'
+                        @search='handleChannelSearch'
+                        @change='handleChannelChange'>
+                <a-select-option v-for='item in distributorList' :key='item.id' :value='item.departNameAbbr'>
+                  {{ item.departName }}
                 </a-select-option>
               </a-select>
             </a-form-item>
@@ -57,10 +58,6 @@
             <a-button @click="searchQuery" type="primary">查询</a-button>
             <a-button @click="resetQuery">重置</a-button>
           </a-col>
-          <!-- <div class="group">
-            <div class="title">项目：</div>
-            <j-dict-select-tag v-model="queryParam.projectId" dictCode="project_info, project_name, id, logical_state=1" placeholder="请选择项目组" style="width: 180px"></j-dict-select-tag>
-          </div> -->
         </a-row>
       </a-form>
     </div>
@@ -107,9 +104,22 @@
 
       <span slot="action" slot-scope="text, record">
         <div class="btn-group" style="display: flex;">
-        <!-- <div class="btn-group" v-if="record.status === 1" style="display: flex;"> -->
-          <a @click="preview(record)">查看</a>
-          <a @click="downloadCode(record)" v-has="'codeEdit'">下载编号</a>
+          <a v-if="record.status === 1" @click="preview(record)">查看编号</a>
+          <a v-if="record.status === 1" @click="downloadCode(record)" v-has="'codeEdit'">下载编号</a>
+          <a v-if="record.status !== 1" @click="handleShowLog(record)" v-has="'codeEdit'">查看日志</a>
+          <!-- <a-dropdown>
+            <a class="ant-dropdown-link">更多 <a-icon type="down"/></a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a @click="downloadCode(record)" v-has="'codeEdit'">下载编号</a>
+              </a-menu-item>
+              <a-menu-item>
+                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">
+                  <a>删除</a>
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown> -->
         </div>
       </span>
     </a-table>
@@ -118,6 +128,8 @@
     <ShowImportCodeModal ref="showImportCodeModal" @ok="modalFormOk" />
 
     <ImportHistoricalCodeModal ref="importHistoricalCodeModal" @ok="modalFormOk" />
+    <OrderHistoryModal ref="orderHistoryModal" @ok="modalFormOk" />
+
   </a-card>
 </template>
 
@@ -125,13 +137,14 @@
 import '@/assets/less/TableExpand.less'
 import { mixinDevice } from '@/utils/mixin'
 import { JeecgListMixin } from '@/mixins/JeecgListMixinForMount'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
 import ShowCreateCodeModal from './modules/sample/ShowCreateCodeModal'
 import ShowImportCodeModal from './modules/sample/ShowImportCodeModal'
 import ImportHistoricalCodeModal from './modules/sample/ImportHistoricalCodeModal'
 import Vue from 'vue'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import { queryRoleUsers } from '../../api/material'
-import { getDistributorList } from '../../api/product/index'
+import OrderHistoryModal from '../order/modules/OrderHistoryModal.vue'
 
 function sellFetch(value, callback) {
   let timeout
@@ -173,11 +186,12 @@ function sellFetch(value, callback) {
 
 export default {
   name: 'CodeControl',
-  mixins: [JeecgListMixin, mixinDevice],
+  mixins: [JeecgListMixin, mixinDevice, selectorFilterMixin],
   components: {
     ShowCreateCodeModal,
     ShowImportCodeModal,
-    ImportHistoricalCodeModal
+    ImportHistoricalCodeModal,
+    OrderHistoryModal
   },
   data() {
     return {
@@ -239,7 +253,7 @@ export default {
           //   }
           // }
         },
-        
+
         {
           title: '状态',
           align: 'center',
@@ -279,13 +293,15 @@ export default {
         }
       ],
       url: {
-        list: `mission/codeManagement/list`
+        list: `mission/codeManagement/list`,
+        delete: 'mission/codeManagement/delete'
       },
       distributorList: [],
       sellData: [],
       user: null,
       hospitalList: [],
-      sellValue: undefined
+      sellValue: undefined,
+      channelValue: undefined
     }
   },
   computed: {
@@ -324,13 +340,13 @@ export default {
       this.$refs.viewportUploadModal.show()
     },
     handleSellSearch(value) {
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
     },
     handleSellChange(value) {
       this.sellValue = value
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
       this.$set(this.queryParam, 'agencyId', undefined) // clean the previous data if the sellUser or sellUserId changed
@@ -340,26 +356,21 @@ export default {
         this.loadDistributorList(value)
       }
     },
-    loadDistributorList(value) {
-      const that = this
-      getDistributorList({
-        sellUser: value
-      }).then(res => {
-        if (res.success) {
-          that.distributorList = res.result.records
-        } else {
-          that.$message.warning(res.message)
-        }
-      })
-    },
     handleImportHistorical() {
       this.$refs.importHistoricalCodeModal.show()
+    },
+    handleShowLog(record) {
+      this.$refs.orderHistoryModal.show(record)
+    },
+    onTimeChange(date, dateString) {
+      this.queryParam.updateTime_begin = dateString[0]
+      this.queryParam.updateTime_end = dateString[1]
     }
   },
   mounted() {
-    this.user = this.$store.state.user.info
+    this.user = this.$store.getters.userRole
     this.loadDistributorList()
-    if (this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics')) {
+    if (this.user.includes('sales_omics') && !this.user.includes('sales_super_omics')) {
       this.sellData = [this.user]
     }
   },
@@ -404,6 +415,7 @@ export default {
     margin-right: 15px;
   }
 }
+
 .btn-group {
   display: flex;
   justify-content: space-evenly;

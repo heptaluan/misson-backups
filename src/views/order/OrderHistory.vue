@@ -17,7 +17,7 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type='primary' @click='batchImport'>批量导入订单</a-button>
+      <a-button type="primary" @click="batchImport">批量导入订单</a-button>
     </div>
 
     <!-- table区域-begin -->
@@ -26,8 +26,8 @@
         ref="table"
         size="middle"
         bordered
-        rowKey="index"
-        class="j-table-force-nowrap"
+        rowKey='id'
+        class='j-table-force-nowrap'
         :scroll="{ x: true }"
         :columns="columns"
         :dataSource="dataSource"
@@ -57,8 +57,8 @@
         </template>
 
         <span slot="action" slot-scope="text, record" style="display: flex;justify-content: space-evenly;">
-          <a v-if="record.taskStatus === 3" @click="handleShowLog(record)">查看日志</a>
-          <a v-if="record.taskStatus === 2" @click="handlePreview(record)">查看订单</a>
+          <a v-if="record.taskStatus === 3 || record.taskStatus === 4" @click="handleShowLog(record)">查看日志</a>
+          <a v-if="record.taskStatus === 2 || record.taskStatus === 4" @click="handlePreview(record)">查看订单</a>
         </span>
       </a-table>
     </div>
@@ -74,7 +74,6 @@ import OrderHistoryModal from './modules/OrderHistoryModal'
 import { CommonSingleUpload, startOrderImportTask } from 'src/api/order/index'
 import OrderBatchImportModal from './modules/orderBatchImportModal'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
-
 
 export default {
   name: 'OrderHistory',
@@ -109,6 +108,11 @@ export default {
           dataIndex: 'fileName'
         },
         {
+          title: '渠道商',
+          align: 'center',
+          dataIndex: 'accessShortName_dictText'
+        },
+        {
           title: '创建人',
           align: 'center',
           dataIndex: 'createBy'
@@ -132,6 +136,8 @@ export default {
                 return '成功'
               case 3:
                 return '失败'
+              case 4:
+                return '部分成功'
               default:
                 break
             }
@@ -220,11 +226,12 @@ export default {
     },
     batchImport(record) {
       this.$refs.orderBatchImportModal.show(record)
-    },
+    }
   }
 }
 </script>
-<style lang='less' scoped>
+
+<style lang="less" scoped>
 .table-operator {
   margin-bottom: 0;
 }

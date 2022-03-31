@@ -30,7 +30,7 @@
           <a-form-model-item label="登录密码" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="password" >
             <a-input type="password" placeholder="请输入登录密码" v-model="model.password" />
           </a-form-model-item>
-  
+
           <a-form-model-item label="确认密码" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="confirmpassword" >
             <a-input type="password" @blur="handleConfirmBlur" placeholder="请重新输入登录密码" v-model="model.confirmpassword"/>
           </a-form-model-item>
@@ -44,22 +44,26 @@
           <a-input placeholder="请输入工号" v-model="model.workNo" />
         </a-form-model-item>
 
-        <a-form-model-item label="职务" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <j-select-position placeholder="请选择职务" :multiple="false" v-model="model.post"/>
-        </a-form-model-item>
+        <!--        <a-form-model-item label="职务" :labelCol="labelCol" :wrapperCol="wrapperCol">-->
+        <!--          <j-select-position placeholder="请选择职务" :multiple="false" v-model="model.post"/>-->
+        <!--        </a-form-model-item>-->
 
         <a-form-model-item label="角色分配" :labelCol="labelCol" :wrapperCol="wrapperCol" v-show="!roleDisabled" >
           <j-multi-select-tag
             :disabled="disableSubmit"
             v-model="model.selectedroles"
-            :options="rolesOptions"
-            placeholder="请选择角色">
+            :options='rolesOptions'
+            @change='roleChange'
+            placeholder='请选择角色'>
           </j-multi-select-tag>
         </a-form-model-item>
 
         <!--部门分配-->
-        <a-form-model-item label="部门分配" :labelCol="labelCol" :wrapperCol="wrapperCol" v-show="!departDisabled">
-          <j-select-depart v-model="model.selecteddeparts" :multi="true" @back="backDepartInfo" :backDepart="true" :treeOpera="true">></j-select-depart>
+        <a-form-model-item label='部门分配' :labelCol='labelCol' :wrapperCol='wrapperCol' v-show='!departDisabled'>
+          <j-select-depart v-model='model.selecteddeparts' :multi='true' @back='backDepartInfo' :backDepart='true'
+                           :treeOpera='true'
+                           :alldepart="'company'"
+          ></j-select-depart>
         </a-form-model-item>
 
         <!--租户分配-->
@@ -68,38 +72,49 @@
             :disabled="disableSubmit"
             v-model="model.relTenantIds"
             :options="tenantsOptions"
-            placeholder="请选择租户">
+            placeholder='请选择租户'>
           </j-multi-select-tag>
         </a-form-model-item>
 
-        <a-form-model-item label="身份" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <a-radio-group  v-model="model.userIdentity"  @change="identityChange">
-            <a-radio :value="1">普通用户</a-radio>
-            <a-radio :value="2">上级</a-radio>
+        <a-form-model-item label='身份' :labelCol='labelCol' :wrapperCol='wrapperCol'>
+          <a-radio-group v-model='model.userIdentity' @change='identityChange'>
+            <a-radio :value='1'>普通用户</a-radio>
+            <a-radio :value='2'>上级</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item label="负责部门" :labelCol="labelCol" :wrapperCol="wrapperCol"  v-if="departIdShow==true">
-          <j-multi-select-tag
-            :disabled="disableSubmit"
-            v-model="model.departIds"
-            :options="nextDepartOptions"
-            placeholder="请选择负责部门">
-          </j-multi-select-tag>
+        <a-form-model-item :label="model.userIdentity == 1 ? '关联渠道商': '管辖范围'" :labelCol='labelCol'
+                           :wrapperCol='wrapperCol'
+                           v-show='(model.userIdentity == 1 && isOperator) || model.userIdentity == 2'
+                           prop='departIds'>
+          <j-select-depart v-model='model.departIds' :multi='true' @back='backDepartInfo' :backDepart='true'
+                           :disabled='model.userIdentity==2'
+                           :treeOpera='true' :alldepart="model.userIdentity == 1 ? 'user' : 'superUser'">
+          </j-select-depart>
+        </a-form-model-item>
+        <!--        <a-form-model-item :label="'管辖范围'" :labelCol='labelCol'-->
+        <!--                           :wrapperCol='wrapperCol' v-if='model.userIdentity == 2'-->
+        <!--                           prop='departIds'>-->
+        <!--          <j-select-depart v-model='model.departIds' :multi='true' @back='backDepartInfo' :backDepart='true'-->
+        <!--                           :treeOpera='true' :alldepart="'duty'" :disabled='model.userIdentity==2'>-->
+        <!--          </j-select-depart>-->
+        <!--        </a-form-model-item>-->
+        <a-form-model-item label='来源' :labelCol='labelCol' :wrapperCol='wrapperCol' v-show='resourceShow && isOperator'>
+          <j-multi-select-tag v-model='model.chargeSourceTypes' dictCode='order_source_type' placeholder='请选择来源' />
         </a-form-model-item>
 
-        <a-form-model-item label="头像" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <j-image-upload class="avatar-uploader" text="上传" v-model="model.avatar" ></j-image-upload>
+        <a-form-model-item label='头像' :labelCol='labelCol' :wrapperCol='wrapperCol'>
+          <j-image-upload class='avatar-uploader' text='上传' v-model='model.avatar'></j-image-upload>
         </a-form-model-item>
 
-        <a-form-model-item label="生日" :labelCol="labelCol" :wrapperCol="wrapperCol">
+        <a-form-model-item label='生日' :labelCol='labelCol' :wrapperCol='wrapperCol'>
           <a-date-picker
-            style="width: 100%"
-            placeholder="请选择生日"
+            style='width: 100%'
+            placeholder='请选择生日'
             v-model="model.birthday"
             :format="dateFormat"
             :getCalendarContainer="node => node.parentNode"/>
         </a-form-model-item>
-     
+
         <a-form-model-item label="性别" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-select  v-model="model.sex"  placeholder="请选择性别" :getPopupContainer= "(target) => target.parentNode">
             <a-select-option :value="1">男</a-select-option>
@@ -166,40 +181,48 @@
           password: [{required: true,pattern:/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[~!@#$%^&*()_+`\-={}:";'<>?,./]).{8,}$/,message: '密码由8位数字、大小写字母和特殊符号组成!'},
                      {validator: this.validateToNextPassword,trigger: 'change'}],
           confirmpassword: [{required: true, message: '请重新输入登录密码!',},
-                            { validator: this.compareToFirstPassword,}],
-          realname:[{ required: true, message: '请输入用户名称!' }],
-          phone: [{required: true, message: '请输入手机号!'}, {validator: this.validatePhone}],
-          email: [{validator: this.validateEmail}],
-          roles:{},
-          workNo:[ { required: true, message: '请输入工号' },
-                  { validator: this.validateWorkNo }],
-          telephone: [{ pattern: /^0\d{2,3}-[1-9]\d{6,7}$/, message: '请输入正确的座机号码' },]
+            { validator: this.compareToFirstPassword }],
+          realname: [{ required: true, message: '请输入用户名称!' }],
+          phone: [{ required: true, message: '请输入手机号!' }, { validator: this.validatePhone }],
+          email: [{ validator: this.validateEmail }],
+          roles: {},
+          workNo: [{ required: true, message: '请输入工号' },
+            { validator: this.validateWorkNo }],
+          telephone: [{ pattern: /^0\d{2,3}-[1-9]\d{6,7}$/, message: '请输入正确的座机号码' }]
         },
-        departIdShow:false,
-        title:"操作",
+        departIdShow: false,
+        title: '操作',
         visible: false,
         model: {},
         labelCol: {
           xs: { span: 24 },
-          sm: { span: 5 },
+          sm: { span: 5 }
         },
         wrapperCol: {
           xs: { span: 24 },
-          sm: { span: 16 },
+          sm: { span: 16 }
         },
         uploadLoading:false,
         confirmLoading: false,
         headers:{},
         url: {
-          fileUpload: window._CONFIG['domianURL']+"/sys/common/upload",
-          userWithDepart: "/sys/user/userDepartList", // 引入为指定用户查看部门信息需要的url
-          userId:"/sys/user/generateUserId", // 引入生成添加用户情况下的url
-          syncUserByUserName:"/act/process/extActProcess/doSyncUserByUserName",//同步用户到工作流
+          fileUpload: window._CONFIG['domianURL'] + '/sys/common/upload',
+          userWithDepart: '/sys/user/userDepartList', // 引入为指定用户查看部门信息需要的url
+          userId: '/sys/user/generateUserId', // 引入生成添加用户情况下的url
+          syncUserByUserName: '/act/process/extActProcess/doSyncUserByUserName',//同步用户到工作流
           queryTenantList: '/sys/tenant/queryList'
         },
         tenantsOptions: [],
-        rolesOptions:[],
-        nextDepartOptions:[],
+        rolesOptions: [],
+        nextDepartOptions: [],
+        orderResource: [
+          { key: 0, value: '门诊' },
+          { key: 1, value: '商检' },
+          { key: 2, value: '科研' }
+        ],
+        isOperator: false,
+        isChannel: false,
+        resourceShow: true
       }
     },
     created () {
@@ -219,36 +242,39 @@
         this.edit({activitiSync:'1',userIdentity:1});
       },
       edit (record) {
-        let that = this;
-        that.visible = true;
+        let that = this
+        that.visible = true
         //根据屏幕宽度自适应抽屉宽度
-        this.resetScreenSize();
-        that.userId = record.id;
-        that.model = Object.assign({},{selectedroles:'',selecteddeparts:''}, record);
-        //身份为上级显示负责部门，否则不显示
-        if(this.model.userIdentity==2){
-          this.departIdShow=true;
-        }else{
-          this.departIdShow=false;
-        }
+        this.resetScreenSize()
+        that.userId = record.id
+        that.model = Object.assign({}, { selectedroles: '', selecteddeparts: '' }, record)
 
-        if(record.hasOwnProperty("id")){
-          that.getUserRoles(record.id);
-          that.getUserDeparts(record.id);
+        if (record.hasOwnProperty('id')) {
+          that.getUserRoles(record.id)
+          that.getUserDeparts(record.id)
+        } else {
+          this.identityChange(this.model.userIdentity)
         }
-        console.log('that.model=',that.model)
+        console.log('that.model=', that.model)
       },
-      isDisabledAuth(code){
-        return disabledAuthFilter(code);
+      initTreeData(record) {
+        this.changeTreeOptions('company', record.orgCatalog)
+        this.identityChange(record.userIdentity, true)
+      },
+      isDisabledAuth(code) {
+        return disabledAuthFilter(code)
+      },
+      departBelongSwitch(orgCatalog) {
+        this.model.orgCatalog = orgCatalog
       },
       //窗口最大化切换
-      toggleScreen(){
-        if(this.modaltoggleFlag){
-          this.modalWidth = window.innerWidth;
-        }else{
-          this.modalWidth = 800;
+      toggleScreen() {
+        if (this.modaltoggleFlag) {
+          this.modalWidth = window.innerWidth
+        } else {
+          this.modalWidth = 800
         }
-        this.modaltoggleFlag = !this.modaltoggleFlag;
+        this.modaltoggleFlag = !this.modaltoggleFlag
       },
       // 根据屏幕变化,设置抽屉尺寸
       resetScreenSize(){
@@ -276,29 +302,85 @@
         queryall().then((res)=>{
           if(res.success){
             this.rolesOptions = res.result.map((item,index,arr)=>{
-              let c = {label:item.roleName, value:item.id}
+              let c = { label: item.roleName, value: item.id, roleCode: item.roleCode }
               return c;
             })
             console.log('this.rolesOptions: ',this.rolesOptions)
           }
         });
       },
-      getUserRoles(userid){
-        queryUserRole({userid:userid}).then((res)=>{
-          if(res.success){
-            this.model.selectedroles = res.result.join(",");
-            console.log('that.model.selectedroles=',this.model.selectedroles)
+      getUserRoles(userid) {
+        queryUserRole({ userid: userid }).then((res) => {
+          if (res.success) {
+            this.model.selectedroles = res.result.join(',')
+            // console.log('that.model.selectedroles=', this.model.selectedroles)
+            this.roleChange(this.model.selectedroles)
           }
-        });
+        })
       },
-      getUserDeparts(userid){
-        let that = this;
-        getAction(that.url.userWithDepart,{userId:userid}).then((res)=>{
-          if(res.success){
-            let departOptions=[];
-            let selectDepartKeys=[]
+      roleChange(ele) {
+        let operators = []
+        let channels = []
+        this.rolesOptions.forEach(item => {
+          if (item.roleCode === 'operate_omics' || item.roleCode === 'operate_omics_manage') {
+            operators.push(item)
+          }
+          if (item.roleCode === 'channel_omics' || item.roleCode === 'channel_omics_sale_manage') {
+            channels.push(item)
+          }
+        })
+        const arr = ele.split(',')
+        if (operators.length > 0) {
+          this.isOperator = this.checkIncludes(arr, operators)
+        }
+        if (channels.length > 0) {
+          this.isChannel = this.checkIncludes(arr, channels)
+        }
+        if (this.isOperator) {
+          this.isChannel = false
+          if (channels.length > 0) {
+            this.model.selectedroles = this.removeRole(arr, channels)
+          }
+          this.departBelongSwitch('1')
+        } else if (this.isChannel) {
+          this.isOperator = false
+          if (operators.length > 0) {
+            this.model.selectedroles = this.removeRole(arr, operators)
+          }
+          this.departBelongSwitch('3000')
+        } else {
+          this.departBelongSwitch()
+        }
+        this.initTreeData(this.model)
+      },
+      checkIncludes(a, b) {
+        for (let i = 0; i < a.length; i++) {
+          for (let j = 0; j < b.length; j++) {
+            if (a[i] == b[j].value) {
+              return true
+            }
+          }
+        }
+      },
+      removeRole(arr, target) {
+        for (let i = 0; i < arr.length; i++) {
+          for (let j = 0; j < target.length; j++) {
+            if (arr[i] == target[j].value) {
+              arr.splice(i, 1)
+              this.$message.error('无法同时绑定运营和渠道商角色')
+            }
+          }
+        }
+        return arr.toString()
+      },
+      getUserDeparts(userid) {
+        let that = this
+        getAction(that.url.userWithDepart, { userId: userid }).then((res) => {
+          if (res.success) {
+            let departOptions = []
+            let selectDepartKeys = []
             for (let i = 0; i < res.result.length; i++) {
-              selectDepartKeys.push(res.result[i].key);
+              selectDepartKeys.push(res.result[i].key)
               //新增负责部门选择下拉框
               departOptions.push({
                 value: res.result[i].key,
@@ -307,7 +389,7 @@
             }
             that.model.selecteddeparts = selectDepartKeys.join(",")
             that.nextDepartOptions=departOptions;
-            console.log('that.nextDepartOptions=',that.nextDepartOptions)
+            // console.log('that.nextDepartOptions=',that.nextDepartOptions)
           }
         })
       },
@@ -321,15 +403,17 @@
       refresh () {
         this.userId=""
         this.nextDepartOptions=[];
-        this.departIdShow=false;
+        this.departIdShow = false
       },
       close () {
         this.$emit('close');
         this.visible = false;
         this.disableSubmit = false;
         this.nextDepartOptions=[];
-        this.departIdShow=false;
-        this.$refs.form.resetFields();
+        this.departIdShow = false
+        this.isOperator = false
+        this.isChannel = false
+        this.$refs.form.resetFields()
       },
       moment,
       handleSubmit () {
@@ -337,21 +421,21 @@
         // 触发表单验证
         this.$refs.form.validate(valid => {
           if (valid) {
-            that.confirmLoading = true;
+            that.confirmLoading = true
             //如果是上级择传入departIds,否则为空
-            if(this.model.userIdentity!==2){
-              this.model.departIds="";
+            // if (this.model.userIdentity !== 2 && this.model.userIdentity !== 3) {
+            //   this.model.departIds = ''
+            // }
+            let obj
+            if (!this.model.id) {
+              this.model.id = this.userId
+              obj = addUser(this.model)
+            } else {
+              obj = editUser(this.model)
             }
-            let obj;
-            if(!this.model.id){
-              this.model.id = this.userId;
-              obj=addUser(this.model);
-            }else{
-              obj=editUser(this.model);
-            }
-            obj.then((res)=>{
-              if(res.success){
-                that.$message.success(res.message);
+            obj.then((res) => {
+              if (res.success) {
+                that.$message.success(res.message)
                 that.$emit('ok');
               }else{
                 that.$message.warning(res.message);
@@ -366,6 +450,7 @@
         })
       },
       handleCancel () {
+        // this.$bus.$off('innerObserve')
         this.close()
       },
       validateToNextPassword (rule, value, callback) {
@@ -474,12 +559,46 @@
         }
         //TODO 验证文件大小
       },
-      identityChange(e){
-        if(e.target.value===1){
-            this.departIdShow=false;
-        }else{
-            this.departIdShow=true;
+      identityChange(e, isInit) {
+        if (e === 1 || (e.target && e.target.value === 1)) {
+          if (this.isOperator) {
+            this.departIdShow = true
+            this.resourceShow = true
+          } else {
+            this.departIdShow = false
+            this.resourceShow = true
+          }
+          if (!isInit) {
+            this.model.departIds = undefined
+          }
+          this.changeTreeOptions('user', 3000)
+        } else if (e === 2 || (e.target && e.target.value === 2)) {
+          this.departIdShow = true
+          if (this.model.selecteddeparts && this.model.selecteddeparts != '') {
+            this.model.departIds = this.model.selecteddeparts
+          }
+          this.resourceShow = false
+          this.changeTreeOptions('superUser', this.model.orgCatalog)
         }
+      },
+      changeTreeOptions(role, selectType) {
+        this.$nextTick(() => {
+          this.$bus.$emit('innerObserve', { id: this.userId, role: role, catalog: selectType })
+        })
+      }
+    },
+    watch: {
+      // 'model.selecteddeparts'(n, o) {
+      //   if (n && n != '') {
+      //     this.identityChange(this.model.userIdentity)
+      //   }
+      //   console.log(this.model.selecteddeparts)
+      // }
+      'model.departIds'(n, o) {
+        // if (n && n != '') {
+        //   this.identityChange(this.model.userIdentity)
+        // }
+        // console.log(n, '```', o)
       }
     }
   }

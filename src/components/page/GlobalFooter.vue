@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     setFooterStyle() {
-      if (this.$route.name === 'viewport-viewportDetail') {
+      if (this.$route.name === 'viewport-viewportDetail' || this.$route.name === 'viewportReviewDetail') {
         this.showFooter = false
       } else {
         this.showFooter = true

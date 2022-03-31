@@ -14,6 +14,7 @@
 </template>
 
 <script>
+
 import BaseInfo from './modules/baseInfo'
 import ClinicalInfo from './modules/clinicalInfo'
 import OrderInfo from './modules/orderInfo'

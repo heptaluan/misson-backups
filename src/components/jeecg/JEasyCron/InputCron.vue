@@ -24,44 +24,44 @@ import EasyCron from './EasyCron.vue'
 
 export default {
   name: 'input-cron',
-  components: { EasyCron },
+  components: {EasyCron},
   model: {
     prop: 'cronValue',
-    event: 'change',
+    event: 'change'
   },
   props: {
     cronValue: {
       type: String,
-      default: '',
+      default: ''
     },
     width: {
       type: String,
-      default: '800px',
+      default: '800px'
     },
     placeholder: {
       type: String,
-      default: '请输入cron表达式',
+      default: '请输入cron表达式'
     },
     disabled: {
       type: Boolean,
-      default: false,
+      default: false
     },
     exeStartTime: {
       type: [Number, String, Object],
-      default: 0,
+      default: 0
     },
     hideSecond: {
       type: Boolean,
-      default: false,
+      default: false
     },
     hideYear: {
       type: Boolean,
-      default: false,
+      default: false
     },
     remote: {
       type: Function,
-      default: null,
-    },
+      default: null
+    }
   },
   data() {
     return {
@@ -78,20 +78,22 @@ export default {
     },
     editCronValue(newVal, oldVal) {
       this.$emit('change', newVal)
-    },
+    }
   },
   methods: {
     showConfigDlg() {
       if (!this.disabled) {
         this.show = true
       }
-    },
-  },
+    }
+  }
 }
 </script>
 
 <style scoped>
-.config-btn {
-  cursor: pointer;
-}
+
+  .config-btn {
+    cursor: pointer;
+  }
+
 </style>

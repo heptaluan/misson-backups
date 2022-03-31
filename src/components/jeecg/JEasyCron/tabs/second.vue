@@ -7,45 +7,18 @@
       <div class="item">
         <a-radio value="TYPE_RANGE" class="choice" :disabled="disabled">区间</a-radio>
         从
-        <a-input-number
-          :disabled="type !== TYPE_RANGE || disabled"
-          :max="maxValue"
-          :min="minValue"
-          :precision="0"
-          class="w60"
-          v-model="valueRange.start"
-        />
-        秒 至
-        <a-input-number
-          :disabled="type !== TYPE_RANGE || disabled"
-          :max="maxValue"
-          :min="minValue"
-          :precision="0"
-          class="w60"
-          v-model="valueRange.end"
-        />
+        <a-input-number :disabled="type!==TYPE_RANGE || disabled" :max="maxValue" :min="minValue" :precision="0" class="w60" v-model="valueRange.start"/>
+        秒
+        至
+        <a-input-number :disabled="type!==TYPE_RANGE || disabled" :max="maxValue" :min="minValue" :precision="0" class="w60" v-model="valueRange.end"/>
         秒
       </div>
       <div class="item">
         <a-radio value="TYPE_LOOP" class="choice" :disabled="disabled">循环</a-radio>
         从
-        <a-input-number
-          :disabled="type !== TYPE_LOOP || disabled"
-          :max="maxValue"
-          :min="minValue"
-          :precision="0"
-          class="w60"
-          v-model="valueLoop.start"
-        />
+        <a-input-number :disabled="type!==TYPE_LOOP || disabled" :max="maxValue" :min="minValue" :precision="0" class="w60" v-model="valueLoop.start"/>
         秒开始，间隔
-        <a-input-number
-          :disabled="type !== TYPE_LOOP || disabled"
-          :max="maxValue"
-          :min="minValue"
-          :precision="0"
-          class="w60"
-          v-model="valueLoop.interval"
-        />
+        <a-input-number :disabled="type!==TYPE_LOOP || disabled" :max="maxValue" :min="minValue" :precision="0" class="w60" v-model="valueLoop.interval"/>
         秒
       </div>
       <div class="item">
@@ -53,13 +26,7 @@
         <div class="list">
           <a-checkbox-group v-model="valueList">
             <template v-for="i in specifyRange">
-              <a-checkbox
-                class="list-check-item"
-                :key="`key-${i}`"
-                :value="i"
-                :disabled="type !== TYPE_SPECIFY || disabled"
-                >{{ i }}</a-checkbox
-              >
+              <a-checkbox class="list-check-item" :key="`key-${i}`" :value="i" :disabled="type!==TYPE_SPECIFY || disabled">{{i}}</a-checkbox>
             </template>
           </a-checkbox-group>
         </div>
@@ -80,7 +47,7 @@ export default {
   watch: {
     value_c(newVal, oldVal) {
       this.$emit('change', newVal)
-    },
+    }
   },
   created() {
     this.DEFAULT_VALUE = '*'
@@ -92,10 +59,10 @@ export default {
     this.valueLoop.interval = 1
     // console.info('created')
     this.parseProp(this.prop)
-  },
+  }
 }
 </script>
 
 <style lang="less" scoped>
-@import 'mixin.less';
+  @import "mixin.less";
 </style>

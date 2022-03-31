@@ -4,7 +4,12 @@
       <h3 class="order-title">基本信息</h3>
       <div class="order-content" style="padding-left: 15px;">
         <a-form-model-item label="证件类型" class="order-label" prop="identityType">
-          <a-select :disabled="disabledState" placeholder="请选择证件类型" style="width:200px;" v-model="form.identityType">
+          <a-select
+            :disabled="disabledState"
+            placeholder="请选择证件类型"
+            style="width:200px;"
+            v-model="form.identityType"
+          >
             <a-select-option v-for="item in identityTypeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -73,10 +78,14 @@
         </a-form-model-item>
 
         <a-form-model-item label="渠道商" prop="sendAccess" v-show="showSendAccess || sellValue" class="order-label">
-          <a-select style="width:200px;" v-model="form.sendAccess" placeholder="请选择渠道商"
-            @change="handleChannelChange">
-            <a-select-option v-for="item in distributorList" :key="item.id" :value="item.shortName">
-              {{ item.accessName }}
+          <a-select
+            style='width:200px;'
+            v-model='form.sendAccess'
+            placeholder='请选择渠道商'
+            @change='handleChannelChange'
+          >
+            <a-select-option v-for='item in distributorList' :key='item.id' :value='item.departNameAbbr'>
+              {{ item.departName }}
             </a-select-option>
           </a-select>
         </a-form-model-item>
@@ -84,21 +93,24 @@
 
       <h3 class="order-title">送检单位信息</h3>
       <div class="order-content" style="padding-left: 15px;">
-
         <a-form-model-item label="送检医院" prop="sendHospital" class="order-label">
-          <a-select style="width:200px;" v-model="form.sendHospital" placeholder="请选择送检医院"
-            :disabled="!form.sendAccess" @change="handleHospitalChange"
+          <a-select
+            style="width:200px;"
+            v-model="form.sendHospital"
+            placeholder="请先选择销售和渠道商"
+            :disabled="!form.sendAccess"
+            @change="handleHospitalChange"
           >
-            <a-select-option v-for="item in hospitalList" :key="item.id" :value="item.hospitalName">
+            <a-select-option v-for='item in hospitalList' :key='item.id' :value='item.departNameAbbr'>
               {{ item.hospitalName }}
             </a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="送检科室" prop="sendDepartment" class="order-label" v-show="form.sendAccess" >
-          <a-input disabled placeholder="请输入送检科室" v-model="form.sendDepartment" />
+        <a-form-model-item label="送检科室" prop="sendDepartment" class="order-label" v-show="form.sendAccess">
+          <a-input placeholder="请输入送检科室" v-model="form.sendDepartment" />
         </a-form-model-item>
-        <a-form-model-item label="送检医生" class="order-label" v-show="form.sendAccess" >
-          <a-input disabled placeholder="请输入送检医生" v-model="form.sendDoctor" />
+        <a-form-model-item label="送检医生" class="order-label" v-show="form.sendAccess">
+          <a-input placeholder="请输入送检医生" v-model="form.sendDoctor" />
         </a-form-model-item>
       </div>
 
@@ -279,7 +291,7 @@ export default {
     }
   },
   mounted() {
-    this.user = this.$store.state.user.info
+    this.user = this.$store.getters.userRole
     this.initForm()
   },
   methods: {
@@ -309,11 +321,10 @@ export default {
                 fileSuffix: item.fileSuffix
               })
             })
-
             that.form = res.result
             that.sellValue = res.result.seller_dictText
             that.loadDistributorList(res.result.seller)
-            queryHospitalByMainId({id: res.result.sendAccess}).then(res => {
+            queryHospitalByMainId({ id: res.result.sendAccess }).then(res => {
               that.hospitalList = res.result
             })
             that.disabledState = true
@@ -323,7 +334,7 @@ export default {
         })
       }
       // set value of role to the selector of '关联泰莱销售' if role includes sales_omics but not sales_super_omics
-      if (this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics')) {
+      if (this.user.includes('sales_omics') && !this.user.includes('sales_super_omics')) {
         this.sellData = [this.user]
       }
     },
@@ -398,9 +409,9 @@ export default {
           })
 
           createOrderApplyInfo(that.form).then(res => {
+            that.form.gender = Number(that.form.gender)
+            that.form.identityType = Number(that.form.identityType)
             if (res.code === 200) {
-              that.form.gender = Number(that.form.gender)
-              that.form.identityType = Number(that.form.identityType)
               that.form.chargeType = Number(that.form.chargeType)
               that.orderId = res.result.id
               that.medicalCaseId = res.result.medicalCaseId
@@ -408,7 +419,6 @@ export default {
               history.pushState({}, '', `${this.$route.path}?orderId=${res.result.id}`)
               if (typeof cb === 'function') cb()
             } else {
-              that.form.gender = Number(that.form.gender)
               that.$message.warning(res.message)
             }
           })
@@ -416,17 +426,17 @@ export default {
       })
     },
     handleSellSearch(value) {
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
     },
     handleSellChange(value) {
       this.sellValue = value
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
       // this.$set(this.form, 'sendAccess', '') // clean the previous data if the sellUser or sellUserId changed
-      this.setFormControllerEmpty(this.form, 'sendAccess');
+      this.setFormControllerEmpty(this.form, 'sendAccess')
       if (value) {
         this.showSendAccess = true
         this.form.seller = value
@@ -434,10 +444,10 @@ export default {
       }
     },
     handleChannelChange(value) {
-      queryHospitalByMainId({id: value}).then(res => {
+      queryHospitalByMainId({ id: value }).then(res => {
         if (res.success) {
           this.hospitalList = res.result
-          this.setFormControllerEmpty(this.form, ['sendHospital', 'sendDepartment', 'sendDoctor']);
+          this.setFormControllerEmpty(this.form, ['sendHospital', 'sendDepartment', 'sendDoctor'])
           console.log(this.hospitalList)
         } else {
           this.$message.warning(res.message)
@@ -446,9 +456,9 @@ export default {
     },
     handleHospitalChange(value) {
       this.hospitalList.forEach(hospital => {
-        if (hospital.hospitalName === value) {
-          this.form.sendDepartment = hospital.department;
-          this.form.sendDoctor = hospital.contactDoctor;
+        if (hospital.departNameAbbr === value) {
+          this.form.sendDepartment = hospital.department
+          this.form.sendDoctor = hospital.contactDoctor
         }
       })
     },
@@ -598,12 +608,12 @@ export default {
     setFormControllerEmpty(form, controller) {
       if (Array.isArray(controller)) {
         controller.forEach(c => {
-          this.$set(form, c, undefined);
+          this.$set(form, c, undefined)
         })
       } else {
-        this.$set(form, controller, undefined);
+        this.$set(form, controller, undefined)
       }
-    },
+    }
   }
 }
 </script>

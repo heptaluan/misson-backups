@@ -7,7 +7,7 @@ export default (rule, value, callback) => {
     callback()
     return true
   }
-  const values = value.split(' ').filter((item) => !!item)
+  const values = value.split(' ').filter(item => !!item)
   if (values.length > 7) {
     callback(new Error('Cron表达式最多7项！'))
     return false
@@ -27,7 +27,7 @@ export default (rule, value, callback) => {
       }
       // console.info(yearValues)
       // 判断是否都是数字
-      const checkYear = yearValues.some((item) => isNaN(item))
+      const checkYear = yearValues.some(item => isNaN(item))
       if (checkYear) {
         callback(new Error('Cron表达式参数[年]错误：' + year))
         return false

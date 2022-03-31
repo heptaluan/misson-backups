@@ -1,0 +1,23 @@
+@import "common.less";
+@import "page-layout";
+
+@media print {
+  .noprint{
+    display: none;
+  }
+  .batch-list__wrap {
+    display: none !important;
+  }
+  .page {
+    page-break-after: always;
+    margin: 0cm auto !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .preview-container {
+    padding-top: 0;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+  }
+}

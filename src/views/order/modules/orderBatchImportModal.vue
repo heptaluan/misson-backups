@@ -1,24 +1,46 @@
 <template>
-  <j-modal :title="title" :width="width" :visible="visible" @ok="handleOk" @cancel="handleCancel" okText='批量导入文件'>
+  <j-modal :title="title" :width="width" :visible="visible" @ok="handleOk" @cancel="handleCancel" okText="批量导入文件">
     <a-form-model :model="form" ref="form" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rules">
-      <div class='downloadBox'>
-        <a-icon type="exclamation-circle" class='yellow' />
-        <div class='txt'>请您下载导入模版，填写订单信息后上传</div>
-        <a-button type="primary" icon="download" class='btn' @click="handlDownloadTemplate">下载模板</a-button>
+      <div class="downloadBox">
+        <a-icon type="exclamation-circle" class="yellow" />
+        <div class="txt">请您下载导入模版，填写订单信息后上传</div>
+        <a-button type="primary" icon="download" class="btn" @click="handlDownloadTemplate">下载模板</a-button>
       </div>
 
-      <div class='downloadBox'>
+      <div class='downloadBox drag'>
         <div class='txt'>填写完毕后上传：</div>
-        <a-upload :file-list='fileList' @change='handleChange' :before-upload="beforeUpload">
-          <a-button type="primary" icon="upload">上传文件</a-button>
-        </a-upload>
+        <!--        <a-upload :file-list="fileList" @change="handleChange" :before-upload="beforeUpload">-->
+        <!--          <a-button type="primary" icon="upload">上传文件</a-button>-->
+        <!--        </a-upload>-->
+        <div class='dragBox'>
+          <a-upload-dragger
+            @change='handleChange'
+            :file-list='fileList'
+            :remove='handleRemove'
+            :before-upload='beforeUpload'
+          >
+            <p class='ant-upload-drag-icon'>
+              <a-icon type='inbox' />
+            </p>
+            <p class='ant-upload-text'>
+              可以拖动文件到该区域进行上传
+            </p>
+          </a-upload-dragger>
+        </div>
       </div>
 
-
-      <a-form-model-item label="客户" prop="agencyId" class="sm">
-        <a-select v-model="form.agencyId" placeholder="请选择客户">
-          <a-select-option v-for="item in distributorList" :key="item.id" :value="item.shortName">
-            {{ item.accessName }}
+      <a-form-model-item label='渠道商' prop='agencyId' class='sm'>
+        <a-select v-model='form.agencyId' placeholder='请选择渠道商'
+                  show-search
+                  allowClear
+                  :value='channelValue'
+                  :default-active-first-option='false'
+                  :filter-option='false'
+                  :not-found-content='null'
+                  @search='handleChannelSearch'
+                  @change='handleChannelChange'>
+          <a-select-option v-for='item in distributorList' :key='item.id' :value='item.departNameAbbr'>
+            {{ item.departName }}
           </a-select-option>
         </a-select>
       </a-form-model-item>
@@ -28,11 +50,12 @@
 
 <script>
 import { CommonSingleUpload, startOrderImportTask } from 'src/api/order/index'
-import { getDistributorList } from '@api/product/index'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
 
 export default {
   name: 'OrderBatchImportModal',
+  mixins: [selectorFilterMixin],
   data() {
     return {
       title: '查看编号',
@@ -52,14 +75,15 @@ export default {
       currentFile: null,
       rules: {
         agencyId: [{ required: true, message: '请选择客户', trigger: 'change' }]
-      }
+      },
+      channelValue: undefined
     }
   },
   methods: {
     show() {
-      this.visible = true
       this.form = {}
       this.fileList = []
+      this.visible = true
     },
     handleCancel() {
       this.visible = false
@@ -101,15 +125,22 @@ export default {
           return false
         }
         this.currentFile = file
-        console.log('file: ', this.currentFile);
+        console.log('file: ', this.currentFile)
       }
+    },
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file)
+      const newFileList = this.fileList.slice()
+      newFileList.splice(index, 1)
+      this.fileList = newFileList
+      this.fileInfoId = ''
     },
     handleUpload(file) {
       const that = this
       const formData = new FormData()
       formData.append('file', file.file)
       formData.append('code', '4000')
-      console.log(this.form.agencyId);
+      console.log(this.form.agencyId)
       CommonSingleUpload(formData)
         .then(res => {
           if (res.success) {
@@ -149,18 +180,6 @@ export default {
           this.handleUpload(that.currentFile)
         }
       })
-    },
-    loadDistributorList(value) {
-      const that = this
-      getDistributorList({
-        sellUser: value
-      }).then(res => {
-        if (res.success) {
-          that.distributorList = res.result.records
-        } else {
-          that.$message.warning(res.message)
-        }
-      })
     }
   },
   mounted() {
@@ -168,19 +187,36 @@ export default {
   }
 }
 </script>
-<style scoped lang='less'>
+<style scoped lang="less">
 .downloadBox {
   margin-bottom: 12px;
   display: flex;
+
+  &.drag {
+    flex-wrap: wrap;
+
+    .txt {
+      margin-bottom: 8px;
+    }
+
+    .dragBox {
+      width: 100%;
+      padding-bottom: 24px;
+    }
+  }
+
   .yellow {
     align-self: center;
     margin-right: 12px;
     color: #db9200;
+
     /deep/ svg {
       font-size: 20px;
     }
   }
-  .txt, .btn {
+
+  .txt,
+  .btn {
     align-self: center;
     margin-right: 24px;
   }
@@ -188,5 +224,4 @@ export default {
 .sm {
   width: 50%;
 }
-
 </style>

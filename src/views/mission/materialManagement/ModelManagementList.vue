@@ -3,20 +3,30 @@
     <!-- 查询区域 -->
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
-        <a-row :gutter="24" class="search-group">
-          <a-col class="group">
-            <a-form-item label="耗材编码" :labelCol="{ span: 5 }" >
-              <a-input placeholder="请输入耗材编码" v-model="queryParam.materialCode"></a-input>
+        <a-row :gutter='24' class='search-group'>
+          <a-col class='group'>
+            <a-form-item label='耗材编码' :labelCol='{ span: 5 }'>
+              <a-input placeholder='请输入耗材编码' v-model='queryParam.materialCode'></a-input>
             </a-form-item>
           </a-col>
-          <a-col class="group">
-            <a-form-item label="耗材名称" :labelCol="{ span: 5 }">
-              <a-input placeholder="请输入耗材名称" v-model="queryParam.materialName"></a-input>
+          <a-col class='group'>
+            <a-form-item label='耗材名称' :labelCol='{ span: 5 }'>
+              <a-input placeholder='请输入耗材名称' v-model='queryParam.materialName'></a-input>
             </a-form-item>
           </a-col>
-          <a-col class="group btn">
-            <a-button type="primary" @click="searchQuery">查询</a-button>
-            <a-button @click="searchReset">重置</a-button>
+          <a-col class='group sm'>
+            <a-form-item label='样本类型' :labelCol='{ span: 5 }'>
+              <j-dict-select-tag
+                type='list'
+                v-model='queryParam.sampleType'
+                dictCode='sample_type'
+                placeholder='请选择样本类型'
+              />
+            </a-form-item>
+          </a-col>
+          <a-col class='group btn'>
+            <a-button type='primary' @click='searchQuery'>查询</a-button>
+            <a-button @click='searchReset()'>重置</a-button>
           </a-col>
         </a-row>
       </a-form>

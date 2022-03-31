@@ -9,18 +9,26 @@
     cancelText="关闭">
 
     <a-spin :spinning="confirmLoading">
-      <a-form-model ref="form" :model="model" :rules="validatorRules">
-
+      <a-form-model ref='form' :model='model' :rules='validatorRules'>
         <a-form-model-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          prop="ruleName"
-          label="规则名称">
-          <a-input placeholder="请输入规则名称" v-model="model.ruleName"/>
+          :labelCol='labelCol'
+          :wrapperCol='wrapperCol'
+          label='数据规则'>
+          <a-radio-group buttonStyle='solid' v-model='model.ruleType' @change='ruleChange'>
+            <a-radio-button value='0'>数据可见性规则</a-radio-button>
+            <a-radio-button value='1'>数据脱敏规则</a-radio-button>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item
-          v-show="showRuleColumn"
-          :labelCol="labelCol"
+          :labelCol='labelCol'
+          :wrapperCol='wrapperCol'
+          prop='ruleName'
+          label='规则名称'>
+          <a-input placeholder='请输入规则名称' v-model='model.ruleName' />
+        </a-form-model-item>
+        <a-form-model-item
+          v-show='showRuleColumn'
+          :labelCol='labelCol'
           :wrapperCol="wrapperCol"
           prop="ruleColumn"
           label="规则字段">
@@ -97,7 +105,7 @@
       add(permId) {
         this.permissionId = permId
         //初始化默认值
-        this.edit({status:'1'})
+        this.edit({ status: '1', ruleType: '0' })
       },
       edit(record) {
         this.model = Object.assign({}, record)
@@ -146,6 +154,7 @@
         })
       },
       handleCancel() {
+        this.ruleChange(0)
         this.close()
       },
       initRuleCondition(){
@@ -155,12 +164,22 @@
           this.showRuleColumn = true
         }
       },
-      handleChangeRuleCondition(val){
-        if(val=='USE_SQL_RULES'){
-          this.model.ruleColumn=''
+      handleChangeRuleCondition(val) {
+        if (val == 'USE_SQL_RULES') {
+          this.model.ruleColumn = ''
           this.showRuleColumn = false
-        }else{
+        } else {
           this.showRuleColumn = true
+        }
+      },
+      ruleChange(e) {
+        const type = e.target ? e.target.value : e
+        if (type == 0) {
+          this.validatorRules.ruleConditions[0].required = true
+          this.validatorRules.ruleValue[0].required = true
+        } else {
+          this.validatorRules.ruleConditions[0].required = false
+          this.validatorRules.ruleValue[0].required = false
         }
       }
     }

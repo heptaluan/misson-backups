@@ -5,14 +5,18 @@
  */
 
 export const conclusion = {
-  description: '经多组学分析，该受检者肺小结节良恶性评估为：',
+  description: '经多组学技术综合评析，该受检者肺结节良恶性评估为：',
   high: {
     hint: '提示您肺癌发生风险较高，建议进一步诊疗或严密跟踪。',
     content: '具体请临床医生结合患者的临床症状及本次检测结果进行综合分析。'
   },
-  low: {
+  mid: {
     hint: '提示您具有一定的肺癌发生风险。',
     content: '建议您与临床医生沟通，结合临床信息等结果，做好定期随访。'
+  },
+  low: {
+    hint: '提示您肺癌发生风险较低。',
+    content: '建议您保持良好的生活作息习惯，并结合医生指导建议，做好定期随访。'
   }
 }
 
@@ -23,6 +27,9 @@ export const proteinResult = {
   },
   mid: {
     suggest: '表示受检者肺部器官代谢异常，可能已进入早期病变阶段，但也不排除少数的肺癌发生，建议随访观察。'
+  },
+  low: {
+    suggest: '表示受检者肺部器官代谢正常，建议做好定期检查。'
   }
 }
 /*人工智能阅片分析结果： 小结*/
@@ -33,7 +40,15 @@ export const dicomResult = {
 export const preHeight = 1.32 // 结节小结每行高度
 export const tipHeight = 1.46 // 小结tips高度
 export const preHeightImage = 8.255  // 影像每幅图高度
+export const Patient = {
+  clinical: '肺结节',
+  detectionMethod: '血液蛋白组学/代谢组学，以及医学影像等多组学技术',
+  detectionMethodFK: '分子组学、表观基因组学、医学影像组学等多组学技术',
+  detectionMethodFA: '分子组学、医学影像组学等多组学技术'
+}
 
-
-
-
+export const singature = {
+  Inspector: '杨清婷',
+  Reviewer: '夏文军'
+}
+export const cutOff = 60

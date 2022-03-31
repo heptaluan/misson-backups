@@ -72,7 +72,7 @@
       <a-form-model-item label="订单客户" prop="leaveAgency" v-if="sellUser || form.sellUserId">
         <a-select :disabled="dis" v-model="form.leaveAgency" placeholder="请选择订单客户">
           <a-select-option v-for="item in cooperationList" :key="item.id" :value="item.shortName">
-            {{ item.accessName }}
+            {{ item.departName }}
           </a-select-option>
         </a-select>
       </a-form-model-item>

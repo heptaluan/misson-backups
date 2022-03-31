@@ -93,7 +93,7 @@
     <!-- table区域-end -->
 
     <!-- 表单区域 -->
-    <user-modal ref="modalForm" @ok="modalFormOk"></user-modal>
+    <depart-user-modal ref='modalForm' @ok='modalFormOk'></depart-user-modal>
     <Select-User-Modal ref="selectUserModal" @selectFinished="selectOK"></Select-User-Modal>
     <dept-role-user-modal ref="deptRoleUser"></dept-role-user-modal>
   </a-card>
@@ -103,7 +103,7 @@
   import {JeecgListMixin} from '@/mixins/JeecgListMixin'
   import {getAction, postAction, deleteAction} from '@/api/manage'
   import SelectUserModal from './SelectUserModal'
-  import UserModal from './UserModal'
+  import DepartUserModal from './DepartUserModal'
   import DeptRoleUserModal from './DeptRoleUserModal'
 
   export default {
@@ -112,7 +112,7 @@
     components: {
       DeptRoleUserModal,
       SelectUserModal,
-      UserModal
+      DepartUserModal
     },
     data() {
       return {
@@ -148,16 +148,17 @@
           {
             title: '操作',
             dataIndex: 'action',
-            scopedSlots: {customRender: 'action'},
-            align: "center",
+            scopedSlots: { customRender: 'action' },
+            align: 'center',
             width: 150
           }],
         url: {
-          list: "/sys/user/departUserList",
-          edit: "/sys/user/editSysDepartWithUser",
-          delete: "/sys/user/deleteUserInDepart",
-          deleteBatch: "/sys/user/deleteUserInDepartBatch",
-        }
+          list: '/sys/user/departUserList',
+          edit: '/sys/user/editSysDepartWithUser',
+          delete: '/sys/user/deleteUserInDepart',
+          deleteBatch: '/sys/user/deleteUserInDepartBatch'
+        },
+        disableMixinCreated: true
       }
     },
     created() {

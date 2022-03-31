@@ -6,5 +6,5 @@ export const ChartEventMixins = {
     handleEvent(eventName, event, chart) {
       this.$emit(eventName, event, chart)
     },
-  },
+  }
 }

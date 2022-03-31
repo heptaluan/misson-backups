@@ -8,15 +8,15 @@
  * 高级查询按钮调用 superQuery方法  高级查询组件ref定义为superQueryModal
  * data中url定义 list为查询列表  delete为删除单条记录  deleteBatch为批量删除
  */
-import { filterObj } from '@/utils/util';
-import { deleteAction, getAction,downFile,getFileAccessHttpUrl } from '@/api/manage'
+import { filterObj } from '@/utils/util'
+import { deleteAction, getAction, downFile, getFileAccessHttpUrl } from '@/api/manage'
 import Vue from 'vue'
-import { ACCESS_TOKEN, TENANT_ID } from "@/store/mutation-types"
+import { ACCESS_TOKEN, TENANT_ID } from '@/store/mutation-types'
 import store from '@/store'
-import {Modal} from 'ant-design-vue'
+import { Modal } from 'ant-design-vue'
 
 export const JeecgListMixin = {
-  data(){
+  data() {
     return {
       /* 查询条件-请不要在queryParam中声明非字符串值的属性 */
       queryParam: {},
@@ -57,55 +57,55 @@ export const JeecgListMixin = {
       superQueryMatchType: 'and'
     }
   },
-  mounted () {
-    if(!this.disableMixinCreated){
-      this.loadData();
+  mounted() {
+    if (!this.disableMixinCreated) {
+      this.ipagination.current = this.getParams('pageNo') * 1 || 1
+      this.loadData()
       //初始化字典配置 在自己页面定义
-      this.initDictConfig();
+      this.initDictConfig()
     }
   },
   computed: {
     //token header
-    tokenHeader(){
-      let head = {'X-Access-Token': Vue.ls.get(ACCESS_TOKEN)}
+    tokenHeader() {
+      let head = { 'X-Access-Token': Vue.ls.get(ACCESS_TOKEN) }
       let tenantid = Vue.ls.get(TENANT_ID)
-      if(tenantid){
+      if (tenantid) {
         head['tenant-id'] = tenantid
       }
-      return head;
+      return head
     }
   },
-  methods:{
-    loadData(arg) {
-      if(!this.url.list){
-        this.$message.error("请设置url.list属性!")
+  methods: {
+    loadData(arg, type) {
+      if (!this.url.list) {
+        this.$message.error('请设置url.list属性!')
         return
       }
       //加载数据 若传入参数1则加载第一页的内容
       if (arg === 1) {
-        this.ipagination.current = 1;
+        this.ipagination.current = 1
       }
-      const params = this.getQueryParams();//查询条件
-      this.loading = true;
-      getAction(this.url.list, params).then((res) => {
+      const params = this.getQueryParams(type) //查询条件
+      this.loading = true
+      getAction(this.url.list, params).then(res => {
         if (res.success) {
           //update-begin---author:zhangyafei    Date:20201118  for：适配不分页的数据列表------------
-          this.dataSource = res.result.records||res.result;
-          if(res.result.total)
-          {
-            this.ipagination.total = res.result.total;
-          }else{
-            this.ipagination.total = 0;
+          this.dataSource = res.result.records || res.result
+          if (res.result.total) {
+            this.ipagination.total = res.result.total
+          } else {
+            this.ipagination.total = 0
           }
           //update-end---author:zhangyafei    Date:20201118  for：适配不分页的数据列表------------
         }
-        if(res.code===510){
+        if (res.code === 510) {
           this.$message.warning(res.message)
         }
-        this.loading = false;
+        this.loading = false
       })
     },
-    initDictConfig(){
+    initDictConfig() {
       // console.log("--这是一个假的方法!")
     },
     handleSuperQuery(params, matchType) {
@@ -123,17 +123,47 @@ export const JeecgListMixin = {
     getQueryParams() {
       //获取查询条件
       let sqp = {}
-      if(this.superQueryParams){
-        sqp['superQueryParams']=encodeURI(this.superQueryParams)
+      if (this.superQueryParams) {
+        sqp['superQueryParams'] = encodeURI(this.superQueryParams)
         sqp['superQueryMatchType'] = this.superQueryMatchType
       }
-      const param = Object.assign(sqp, this.queryParam, this.isorter, this.filters)
+
+      // 所有查询条件添加模糊查询
+      const queryParam = Object.assign({}, this.queryParam)
+      for (const key in queryParam) {
+        if (Object.hasOwnProperty.call(queryParam, key)) {
+          if (
+            key === 'createBy' ||
+            key === 'medicalCaseCode' ||
+            key === 'caseName' ||
+            key === 'planName' ||
+            key === 'batchNo' ||
+            key === 'leaveApplyId' ||
+            key === 'caseIdentityNumber' ||
+            key === 'caseBarcode' ||
+            key === 'barcodeGenerateId' ||
+            key === 'addressName' ||
+            key === 'address' ||
+            key === 'identifyCode'
+          ) {
+            queryParam[key] = '*' + queryParam[key] + '*'
+          }
+        }
+      }
+
+      var param = Object.assign(sqp, queryParam, this.isorter, this.filters)
       param.field = this.getQueryField()
       param.pageNo = this.ipagination.current
       param.pageSize = this.ipagination.pageSize
+      this.changeUrl(param.pageNo)
       return filterObj(param)
     },
-    getQueryField () {
+    // 查询记住页码参数
+    changeUrl (pageNo) {
+      if (!pageNo) pageNo = 1
+      window.history.replaceState({}, window.document.title, '?pageNo=' + pageNo )
+    },
+    getQueryField() {
       //TODO 字段权限控制
       let str = 'id,'
       this.columns.forEach(function(value) {
@@ -142,16 +172,16 @@ export const JeecgListMixin = {
       return str
     },
 
-    onSelectChange (selectedRowKeys, selectionRows) {
+    onSelectChange(selectedRowKeys, selectionRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectionRows = selectionRows
     },
-    onClearSelected () {
+    onClearSelected() {
       this.selectedRowKeys = []
       this.selectionRows = []
     },
-    searchQuery() {
-      this.loadData(1)
+    searchQuery(type) {
+      this.loadData(1, type)
     },
     superQuery() {
       this.$refs.superQueryModal.show()
@@ -160,7 +190,7 @@ export const JeecgListMixin = {
       this.queryParam = {}
       this.loadData(1)
     },
-    batchDel: function () {
+    batchDel: function() {
       if (!this.url.deleteBatch) {
         this.$message.error('请设置url.deleteBatch属性!')
         return
@@ -179,30 +209,32 @@ export const JeecgListMixin = {
           content: '是否删除选中数据?',
           onOk: function() {
             that.loading = true
-            deleteAction(that.url.deleteBatch, { ids: ids }).then((res) => {
-              if (res.success) {
-                //重新计算分页问题
-                that.reCalculatePage(that.selectedRowKeys.length)
-                that.$message.success(res.message)
-                that.loadData()
-                that.onClearSelected()
-              } else {
-                that.$message.warning(res.message)
-              }
-            }).finally(() => {
-              that.loading = false
-            })
+            deleteAction(that.url.deleteBatch, { ids: ids })
+              .then(res => {
+                if (res.success) {
+                  //重新计算分页问题
+                  that.reCalculatePage(that.selectedRowKeys.length)
+                  that.$message.success(res.message)
+                  that.loadData()
+                  that.onClearSelected()
+                } else {
+                  that.$message.warning(res.message)
+                }
+              })
+              .finally(() => {
+                that.loading = false
+              })
           }
         })
       }
     },
-    handleDelete: function (id) {
-      if(!this.url.delete){
+    handleDelete: function(id) {
+      if (!this.url.delete) {
         this.$message.error('请设置url.delete属性!')
         return
       }
       const that = this
-      deleteAction(that.url.delete, { id: id }).then((res) => {
+      deleteAction(that.url.delete, { id: id }).then(res => {
         if (res.success) {
           //重新计算分页问题
           that.reCalculatePage(1)
@@ -213,7 +245,7 @@ export const JeecgListMixin = {
         }
       })
     },
-    reCalculatePage(count){
+    reCalculatePage(count) {
       //总数量-count
       let total = this.ipagination.total - count
       //获取删除后的分页数
@@ -240,14 +272,14 @@ export const JeecgListMixin = {
         this.isorter.column = sorter.field
         this.isorter.order = 'ascend' == sorter.order ? 'asc' : 'desc'
       }
-      this.ipagination = pagination;
-      this.loadData();
+      this.ipagination = pagination
+      this.loadData()
     },
-    handleToggleSearch(){
-      this.toggleSearchStatus = !this.toggleSearchStatus;
+    handleToggleSearch() {
+      this.toggleSearchStatus = !this.toggleSearchStatus
     },
     // 给popup查询使用(查询区域不支持回填多个字段，限制只返回一个字段)
-    getPopupField(fields){
+    getPopupField(fields) {
       return fields.split(',')[0]
     },
     modalFormOk() {
@@ -262,12 +294,12 @@ export const JeecgListMixin = {
       this.$refs.modalForm.disableSubmit = true
     },
     /* 导出 */
-    handleExportXls2(){
-      let paramsStr = encodeURI(JSON.stringify(this.getQueryParams()));
-      let url = `${window._CONFIG['domianURL']}/${this.url.exportXlsUrl}?paramsStr=${paramsStr}`;
-      window.location.href = url;
+    handleExportXls2() {
+      let paramsStr = encodeURI(JSON.stringify(this.getQueryParams()))
+      let url = `${window._CONFIG['domianURL']}/${this.url.exportXlsUrl}?paramsStr=${paramsStr}`
+      window.location.href = url
     },
-    handleExportXls(fileName){
+    handleExportXls(fileName) {
       if (!fileName || typeof fileName != 'string') {
         fileName = '导出文件'
       }
@@ -275,7 +307,7 @@ export const JeecgListMixin = {
       if (this.selectedRowKeys && this.selectedRowKeys.length > 0) {
         param['selections'] = this.selectedRowKeys.join(',')
       }
-      downFile(this.url.exportXlsUrl, param).then((data) => {
+      downFile(this.url.exportXlsUrl, param).then(data => {
         if (!data) {
           this.$message.warning('文件下载失败')
           return
@@ -296,29 +328,32 @@ export const JeecgListMixin = {
       })
     },
     /* 导入 */
-    handleImportExcel(info){
+    handleImportExcel(info) {
       if (info.file.status !== 'uploading') {
-        console.log(info.file, info.fileList);
+        console.log(info.file, info.fileList)
       }
       if (info.file.status === 'done') {
         if (info.file.response.success) {
           // this.$message.success(`${info.file.name} 文件上传成功`);
           if (info.file.response.code === 201) {
-            let { message, result: { msg, fileUrl, fileName } } = info.file.response
+            let {
+              message,
+              result: { msg, fileUrl, fileName }
+            } = info.file.response
             let href = window._CONFIG['domianURL'] + fileUrl
             this.$warning({
               title: message,
-              content: (`< div >
+              content: `< div >
                   < span > { msg } < /span><br/ >
                   < span > 具体详情请 < a href = { href } target = '_blank' download = { fileName } > 点击下载 < /a> </span >
-              < /div>`)
+              < /div>`
             })
           } else {
             this.$message.success(info.file.response.message || `${info.file.name} 文件上传成功`)
           }
           this.loadData()
         } else {
-          this.$message.error(`${info.file.name} ${info.file.response.message}.`);
+          this.$message.error(`${info.file.name} ${info.file.response.message}.`)
         }
       } else if (info.file.status === 'error') {
         if (info.file.response.status === 500) {
@@ -339,20 +374,20 @@ export const JeecgListMixin = {
             })
           }
         } else {
-          this.$message.error(`文件上传失败: ${info.file.msg} `);
+          this.$message.error(`文件上传失败: ${info.file.msg} `)
         }
       }
     },
     /* 图片预览 */
-    getImgView(text){
-      if(text && text.indexOf(",")>0){
-        text = text.substring(0,text.indexOf(","))
+    getImgView(text) {
+      if (text && text.indexOf(',') > 0) {
+        text = text.substring(0, text.indexOf(','))
       }
       return getFileAccessHttpUrl(text)
     },
     /* 文件下载 */
     // update--autor:lvdandan-----date:20200630------for：修改下载文件方法名uploadFile改为downloadFile------
-    downloadFile (text) {
+    downloadFile(text) {
       if (!text) {
         this.$message.warning('未知的文件')
         return
@@ -375,5 +410,4 @@ export const JeecgListMixin = {
       return false
     }
   }
-
 }

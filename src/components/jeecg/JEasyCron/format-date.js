@@ -14,7 +14,7 @@ const dateFormat = (date, block) => {
     m: date.getMinutes(), // 分
     s: date.getSeconds(), // 秒
     q: Math.floor((date.getMonth() + 3) / 3), // 季度
-    S: date.getMilliseconds(), // 毫秒
+    S: date.getMilliseconds() // 毫秒
   }
 
   format = format.replace(/([yMdhmsqS])+/g, (all, t) => {
@@ -26,10 +26,7 @@ const dateFormat = (date, block) => {
       }
       return v
     } else if (t === 'y') {
-      return date
-        .getFullYear()
-        .toString()
-        .substr(4 - all.length)
+      return (date.getFullYear().toString()).substr(4 - all.length)
     }
     return all
   })

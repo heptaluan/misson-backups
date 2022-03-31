@@ -1,5 +1,7 @@
 import { asyncRouterMap, constantRouterMap } from "@/config/router.config"
 import OrderDetail from 'src/views/order/OrderMetaDetail.vue'
+import Vue from 'vue'
+import { USER_NAME } from "@/store/mutation-types"
 
 /**
  * 过滤账户是否拥有某一个权限，并将菜单从加载列表移除
@@ -72,6 +74,22 @@ const permission = {
           return o
         })
       }
+      // const userName = Vue.ls.get(USER_NAME)
+      //
+      // if (userName === 'sz2012') {
+      //   data[0].children.push({
+      //     path: '/reportCheck',
+      //     name: 'ReportCheck',
+      //     component: () => import('@/views/report/SampleReportCheckList.vue'),
+      //     meta: { title: '报告审核' },
+      //   })
+      //   data[0].children.push({
+      //     path: '/reportCheckDetail/:id',
+      //     name: 'ReportCheckDetail',
+      //     component: () => import('@/views/report/sampleReportCheckDetail.vue'),
+      //     meta: { title: '报告审核详情' },
+      //   })
+      // }
       state.addRouters = data
       state.routers = constantRouterMap.concat(data)
       //console.log('-----mutations---SET_ROUTERS----', data)

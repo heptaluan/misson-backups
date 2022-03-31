@@ -40,21 +40,27 @@
           <a-col class="group md">
             <!--            <a-form-item label="渠道商" prop="sendAccess" v-show="showSendAccess || sellValue" class="order-label">-->
             <a-form-item label="渠道商" prop="sendAccess" class="order-label">
-              <a-select style="width:200px;" v-model="queryParam.accessShortName" placeholder="请选择渠道商">
-                <a-select-option v-for="item in distributorList" :key="item.id" :value="item.shortName">
-                  {{ item.accessName }}
+              <a-select
+                v-model="queryParam.accessShortName"
+                placeholder="请选择渠道商"
+                show-search
+                :value="channelValue"
+                :default-active-first-option="false"
+                :filter-option="false"
+                :not-found-content="null"
+                @search="handleChannelSearch"
+                @change="handleChannelChange"
+              >
+                <a-select-option v-for="item in distributorList" :key="item.id" :value="item.departNameAbbr">
+                  {{ item.departName }}
                 </a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
 
           <a-col class="group md">
-            <a-form-item label="医院" :labelCol="{ span: 5 }">
-              <a-select v-model="queryParam.hospitalShortName" placeholder="请选择医院">
-                <a-select-option v-for="item in hospitalList" :key="item.id" :value="item.hospitalName">
-                  {{ item.hospitalName }}
-                </a-select-option>
-              </a-select>
+            <a-form-item label="病例编号" :labelCol="{ span: 5 }">
+              <a-input allowClear v-model="queryParam.medicalCaseCode" placeholder="请输入病例编号"></a-input>
             </a-form-item>
           </a-col>
 
@@ -144,10 +150,11 @@
 
 <script>
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
 import '@/assets/less/TableExpand.less'
 import ViewportUploadModal from './modules/ViewportUploadModal.vue'
 import { queryRoleUsers } from '../../api/material'
-import { getHospitalList, getDistributorList } from '../../api/product/index'
+import { ACCESS_TOKEN } from '@/store/mutation-types'
 
 function sellFetch(value, callback) {
   let timeout
@@ -189,7 +196,7 @@ function sellFetch(value, callback) {
 
 export default {
   name: 'ViewportMetaList',
-  mixins: [JeecgListMixin],
+  mixins: [JeecgListMixin, selectorFilterMixin],
   components: {
     ViewportUploadModal
   },
@@ -212,15 +219,18 @@ export default {
           align: 'center',
           dataIndex: 'orderId'
         },
-        // {
-        //   title: '住院号',
-        //   align: 'center',
-        //   dataIndex: 'patientUid'
-        // },
+        {
+          title: '病例编号',
+          align: 'center',
+          dataIndex: 'medicalCaseCode'
+        },
         {
           title: '姓名',
           align: 'center',
-          dataIndex: 'caseName'
+          dataIndex: 'caseName',
+          customRender: function(t, r, index) {
+            return <router-link to={`/order/orderList/orderDetail/${r.orderId}`}>{r.caseName}</router-link>
+          }
         },
         {
           title: '姓名拼写',
@@ -240,27 +250,50 @@ export default {
         {
           title: '检查日期',
           align: 'center',
-          dataIndex: 'createTime'
+          dataIndex: 'studyTime'
         },
         {
           title: '上传时间',
           align: 'center',
-          dataIndex: 'updateTime'
+          dataIndex: 'createTime'
         },
         {
           title: '渠道商',
           align: 'center',
           dataIndex: 'accessShortName_dictText'
         },
+        // {
+        //   title: '医院',
+        //   align: 'center',
+        //   dataIndex: 'hospitalShortName_dictText'
+        // },
         {
-          title: '医院',
+          title: 'patientId',
           align: 'center',
-          dataIndex: 'hospitalShortName_dictText'
+          dataIndex: 'patientId'
+          // customRender: function(t, r, index) {
+          //   if (r.patientUid) {
+          //     return (
+          //       <a-tooltip placement="top" title={r.patientUid}>
+          //         {r.patientUid.substring(0, 15) + '..'}
+          //       </a-tooltip>
+          //     )
+          //   }
+          // }
         },
         {
-          title: '影像号',
+          title: 'ossKey 地址',
           align: 'center',
-          dataIndex: 'patientUid'
+          dataIndex: 'ossKey',
+          customRender: function(t, r, index) {
+            if (r.ossKey) {
+              return (
+                <a-tooltip placement="top" title={r.ossKey}>
+                  {r.ossKey.substring(0, 15) + '..'}
+                </a-tooltip>
+              )
+            }
+          }
         },
         {
           title: '层厚(mm)',
@@ -317,13 +350,13 @@ export default {
       distributorList: [],
       sellData: [],
       user: null,
-      hospitalList: [],
       sellValue: undefined,
+      channelValue: undefined,
       showSendAccess: false,
       dicomtaskStatus: [
         { key: '已上传', value: 0 },
-        { key: '已归档', value: 1 },
-        { key: '归档失败', value: 2 }
+        { key: '归档成功', value: 1 },
+        { key: '失败', value: 2 }
       ]
     }
   },
@@ -340,58 +373,34 @@ export default {
       this.loadData()
     },
     handleShowDetail(record) {
-      this.$router.push({
-        path: `/viewport/viewportDetail?resource=${record.patientId}&type=0`
-      })
-    },
-    loadHospitalList() {
-      getHospitalList().then(res => {
-        if (res.success) {
-          this.hospitalList = res.result.records
-          console.log(this.hospitalList)
-        } else {
-          that.$message.warning(res.message)
-        }
-      })
+      window.open(`/viewport/viewportDetail?resource=${record.id}`, '_blank')
     },
     handleShowViewportUploadModal() {
       this.$refs.viewportUploadModal.show()
     },
     handleSellSearch(value) {
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
     },
     handleSellChange(value) {
       this.sellValue = value
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
-      this.$set(this.queryParam, 'sendAccess', undefined) // clean the previous data if the sellUser or sellUserId changed
+      // clean the previous data if the sellUser or sellUserId changed
+      this.$set(this.queryParam, 'sendAccess', undefined)
       if (value) {
         this.showSendAccess = true
         this.queryParam.seller = value
         this.loadDistributorList(value)
       }
-    },
-    loadDistributorList(value) {
-      const that = this
-      getDistributorList({
-        sellUser: value
-      }).then(res => {
-        if (res.success) {
-          that.distributorList = res.result.records
-        } else {
-          that.$message.warning(res.message)
-        }
-      })
     }
   },
   mounted() {
-    this.user = this.$store.state.user.info
+    this.user = this.$store.getters.userRole
     this.loadDistributorList()
-    this.loadHospitalList()
-    if (this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics')) {
+    if (this.user.includes('sales_omics') && !this.user.includes('sales_super_omics')) {
       this.sellData = [this.user]
     }
   }

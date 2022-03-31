@@ -52,10 +52,16 @@ export const JeecgListMixin = {
       genderOption: [
         { label: '男', value: 1 },
         { label: '女', value: 0 }
+      ],
+      productOption: [
+        { label: '全部', value: '' },
+        { label: '斐盼安', value: 'FA' },
+        { label: '斐盼康', value: 'FK' }
       ]
     }
   },
   created() {
+    this.ipagination.current = this.getParams('pageNo') * 1 || 1
     if (!this.disableMixinCreated) {
       console.log(' -- mixin created -- ')
       this.loadData()
@@ -75,6 +81,17 @@ export const JeecgListMixin = {
     }
   },
   methods: {
+    getParams(key) {
+      const search = window.location.search.substring(1)
+      const vars = search.split('&')
+      for (let i = 0; i < vars.length; i++) {
+        let pair = vars[i].split('=')
+        if (pair[0] === key) {
+          return pair[1]
+        }
+      }
+      return false
+    },
     loadData(arg) {
       if (!this.url.list) {
         this.$message.error('请设置url.list属性!')
@@ -120,18 +137,77 @@ export const JeecgListMixin = {
       }
       this.loadData(1)
     },
-    getQueryParams() {
+    getQueryParams(notWithStar) {
+      // console.log(notWithStar)
       //获取查询条件
       let sqp = {}
       if (this.superQueryParams) {
         sqp['superQueryParams'] = encodeURI(this.superQueryParams)
         sqp['superQueryMatchType'] = this.superQueryMatchType
       }
-      var param = Object.assign(sqp, this.queryParam, this.isorter, this.filters)
+
+      // 所有查询条件添加模糊查询
+      const queryParam = Object.assign({}, this.queryParam)
+      if (queryParam.datePick) {
+        delete queryParam.datePick
+      }
+      for (const key in queryParam) {
+        if (Object.hasOwnProperty.call(queryParam, key)) {
+          if (!notWithStar && (
+            key === 'createBy' ||
+            key === 'medicalCaseCode' ||
+            key === 'caseName' ||
+            key === 'planName' ||
+            key === 'batchNo' ||
+            key === 'leaveApplyId' ||
+            key === 'caseIdentityNumber' ||
+            key === 'caseBarcode' ||
+            key === 'barcodeGenerateId' ||
+            key === 'addressName' ||
+            key === 'address' ||
+            key === 'identifyCode' ||
+            key === 'identityNumber' ||
+            key === 'departName' ||
+            key === 'mobile' ||
+            key === 'phoneNumber' ||
+            key === 'phone' ||
+            key === 'materialName' ||
+            key === 'materialCode'
+          )) {
+            queryParam[key] = '*' + queryParam[key] + '*'
+          }
+        }
+      }
+
+      var param = Object.assign(sqp, queryParam, this.isorter, this.filters)
       param.field = this.getQueryField()
       param.pageNo = this.ipagination.current
       param.pageSize = this.ipagination.pageSize
+      this.changeUrl(param.pageNo)
       return filterObj(param)
+    },
+    // 查询记住页码参数
+    changeUrl (pageNo) {
+      if (!pageNo) pageNo = 1
+      let url = '?pageNo=' + pageNo
+      if (this.$route.name === 'ReportCheck'){
+        let checkType = ''
+        if ('checkType' in this.queryParam) {
+          checkType = this.queryParam.checkType
+        }
+        url += `&&checkType=${checkType}`
+        let reportType = ''
+        if ('reportType' in this.queryParam) {
+          reportType = this.queryParam.reportType
+        }
+        url += `&&reportType=${reportType}`
+        // let imageType = ''
+        // if ('imageType' in this.queryParam) {
+        //   imageType = this.queryParam.imageType
+        // }
+        url += `&&imageType=${imageType}`
+      }
+      window.history.replaceState({}, window.document.title, url)
     },
     getQueryField() {
       //TODO 字段权限控制
@@ -141,7 +217,6 @@ export const JeecgListMixin = {
       })
       return str
     },
-
     onSelectChange(selectedRowKeys, selectionRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectionRows = selectionRows
@@ -393,7 +468,7 @@ export const JeecgListMixin = {
     },
     // 一次清空组件中data里的数据
     cleanDataOfComponent() {
-      Object.assign(this.$data, this.$options.data.call(this));
+      Object.assign(this.$data, this.$options.data.call(this))
     }
   }
 }

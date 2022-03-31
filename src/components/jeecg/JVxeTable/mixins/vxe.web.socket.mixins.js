@@ -67,12 +67,10 @@ const vs = {
     try {
       let ws = this.ws
       if (ws != null && ws.readyState === ws.OPEN) {
-        ws.send(
-          JSON.stringify({
-            type: type,
-            data: message,
-          })
-        )
+        ws.send(JSON.stringify({
+          type: type,
+          data: message
+        }))
       }
     } catch (err) {
       console.warn('【VXEWebSocket】发送消息失败：(' + err.code + ')')
@@ -193,7 +191,7 @@ const vs = {
           if (this.reloadEffect) {
             this.$set(this.reloadEffectRowKeysMap, row.id, true)
           }
-          Object.keys(row).forEach((key) => {
+          Object.keys(row).forEach(key => {
             if (key !== 'id') {
               this.$set(tableRow, key, row[key])
             }
@@ -203,6 +201,7 @@ const vs = {
       }
     },
   },
+
 }
 
 export default {
@@ -210,11 +209,11 @@ export default {
     // 是否开启使用 webSocket 无痕刷新
     socketReload: {
       type: Boolean,
-      default: false,
+      default: false
     },
     socketKey: {
       type: String,
-      default: 'vxe-default',
+      default: 'vxe-default'
     },
   },
   data() {
@@ -227,6 +226,7 @@ export default {
     }
   },
   methods: {
+
     /** 发送socket消息更新行 */
     socketSendUpdateRow(row) {
       vs.sendMessage(vs.constants.TYPE_UVT, {
@@ -234,6 +234,7 @@ export default {
         args: [row, this.caseId],
       })
     },
+
   },
   beforeDestroy() {
     vs.removeBind(vs.tableMap, this.socketKey, this)

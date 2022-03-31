@@ -27,7 +27,7 @@ export default {
     conclusion () {
       const { reportValue } = this.data
       const { description } = conc
-      const _conclusion = reportValue >= 70 ? conc.interpretation : conc.low
+      const _conclusion = reportValue >= 70 ? conc.high : (reportValue >= 50 ? conc.mid : conc.low)
       return {
         description,
         ..._conclusion

@@ -7,68 +7,68 @@ const api = {
   role: '/mock/api/role',
   service: '/mock/api/service',
   permission: '/mock/api/permission',
-  permissionNoPager: '/mock/api/permission/no-pager',
+  permissionNoPager: '/mock/api/permission/no-pager'
 }
 
 export default api
 
 //post
-export function postAction(url, parameter) {
-  let sign = signMd5Utils.getSign(url, parameter)
+export function postAction(url,parameter) {
+  let sign = signMd5Utils.getSign(url, parameter);
   //将签名和时间戳，添加在请求接口 Header
-  let signHeader = { 'X-Sign': sign, 'X-TIMESTAMP': signMd5Utils.getDateTimeToString() }
+  let signHeader = {"X-Sign": sign,"X-TIMESTAMP": signMd5Utils.getDateTimeToString()};
 
   return axios({
     url: url,
-    method: 'post',
+    method:'post' ,
     data: parameter,
-    headers: signHeader,
+    headers: signHeader
   })
 }
 
 //post method= {post | put}
-export function httpAction(url, parameter, method) {
-  let sign = signMd5Utils.getSign(url, parameter)
+export function httpAction(url,parameter,method) {
+  let sign = signMd5Utils.getSign(url, parameter);
   //将签名和时间戳，添加在请求接口 Header
-  let signHeader = { 'X-Sign': sign, 'X-TIMESTAMP': signMd5Utils.getDateTimeToString() }
+  let signHeader = {"X-Sign": sign,"X-TIMESTAMP": signMd5Utils.getDateTimeToString()};
 
   return axios({
     url: url,
-    method: method,
+    method:method ,
     data: parameter,
-    headers: signHeader,
+    headers: signHeader
   })
 }
 
 //put
-export function putAction(url, parameter) {
+export function putAction(url,parameter) {
   return axios({
     url: url,
-    method: 'put',
-    data: parameter,
+    method:'put',
+    data: parameter
   })
 }
 
 //get
-export function getAction(url, parameter) {
-  let sign = signMd5Utils.getSign(url, parameter)
+export function getAction(url,parameter) {
+  let sign = signMd5Utils.getSign(url, parameter);
   //将签名和时间戳，添加在请求接口 Header
-  let signHeader = { 'X-Sign': sign, 'X-TIMESTAMP': signMd5Utils.getDateTimeToString() }
+  let signHeader = {"X-Sign": sign,"X-TIMESTAMP": signMd5Utils.getDateTimeToString()};
 
   return axios({
     url: url,
     method: 'get',
     params: parameter,
-    headers: signHeader,
+    headers: signHeader
   })
 }
 
 //deleteAction
-export function deleteAction(url, parameter) {
+export function deleteAction(url,parameter) {
   return axios({
     url: url,
     method: 'delete',
-    params: parameter,
+    params: parameter
   })
 }
 
@@ -76,7 +76,7 @@ export function getUserList(parameter) {
   return axios({
     url: api.user,
     method: 'get',
-    params: parameter,
+    params: parameter
   })
 }
 
@@ -84,7 +84,7 @@ export function getRoleList(parameter) {
   return axios({
     url: api.role,
     method: 'get',
-    params: parameter,
+    params: parameter
   })
 }
 
@@ -92,7 +92,7 @@ export function getServiceList(parameter) {
   return axios({
     url: api.service,
     method: 'get',
-    params: parameter,
+    params: parameter
   })
 }
 
@@ -100,7 +100,7 @@ export function getPermissions(parameter) {
   return axios({
     url: api.permissionNoPager,
     method: 'get',
-    params: parameter,
+    params: parameter
   })
 }
 
@@ -110,7 +110,7 @@ export function saveService(parameter) {
   return axios({
     url: api.service,
     method: parameter.id == 0 ? 'post' : 'put',
-    data: parameter,
+    data: parameter
   })
 }
 
@@ -120,12 +120,12 @@ export function saveService(parameter) {
  * @param parameter
  * @returns {*}
  */
-export function downFile(url, parameter) {
+export function downFile(url,parameter){
   return axios({
     url: url,
     params: parameter,
-    method: 'get',
-    responseType: 'blob',
+    method:'get' ,
+    responseType: 'blob'
   })
 }
 
@@ -164,13 +164,13 @@ export function downloadFile(url, fileName, parameter) {
  * @param parameter
  * @returns {*}
  */
-export function uploadAction(url, parameter) {
+export function uploadAction(url,parameter){
   return axios({
     url: url,
     data: parameter,
-    method: 'post',
+    method:'post' ,
     headers: {
-      'Content-Type': 'multipart/form-data', // 文件上传
+      'Content-Type': 'multipart/form-data',  // 文件上传
     },
   })
 }
@@ -181,17 +181,17 @@ export function uploadAction(url, parameter) {
  * @param subStr
  * @returns {*}
  */
-export function getFileAccessHttpUrl(avatar, subStr) {
-  if (!subStr) subStr = 'http'
+export function getFileAccessHttpUrl(avatar,subStr) {
+  if(!subStr) subStr = 'http'
   try {
-    if (avatar && avatar.startsWith(subStr)) {
-      return avatar
-    } else {
-      if (avatar && avatar.length > 0 && avatar.indexOf('[') == -1) {
-        return window._CONFIG['staticDomainURL'] + '/' + avatar
+    if(avatar && avatar.startsWith(subStr)){
+      return avatar;
+    }else{
+      if(avatar &&　avatar.length>0 && avatar.indexOf('[')==-1){
+        return window._CONFIG['staticDomainURL'] + "/" + avatar;
       }
     }
-  } catch (err) {
-    return
+  }catch(err){
+   return;
   }
 }

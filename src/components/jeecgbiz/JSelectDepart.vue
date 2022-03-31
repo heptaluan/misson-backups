@@ -5,7 +5,6 @@
       <a-icon slot="prefix" type="cluster" title="部门选择控件" />
       <a-icon v-if="storeVals" slot="suffix" type="close-circle" @click="handleEmpty" title="清空" />
     </a-input>
-
     <j-select-depart-modal
       ref="innerDepartSelectModal"
       :modal-width="modalWidth"
@@ -15,6 +14,7 @@
       :store="storeField"
       :text="textField"
       :treeOpera="treeOpera"
+      :alldepart="alldepart"
       @ok="handleOK"
       @initComp="initComp"
     />
@@ -27,67 +27,70 @@ import { underLinetoHump } from '@/components/_util/StringUtil'
 export default {
   name: 'JSelectDepart',
   components: {
-    JSelectDepartModal,
+    JSelectDepartModal
   },
   props: {
     modalWidth: {
       type: Number,
       default: 500,
-      required: false,
+      required: false
     },
     multi: {
       type: Boolean,
       default: false,
-      required: false,
+      required: false
+    },
+    alldepart: {
+      type: String
     },
     rootOpened: {
       type: Boolean,
       default: true,
-      required: false,
+      required: false
     },
     value: {
       type: String,
-      required: false,
+      required: false
     },
     disabled: {
       type: Boolean,
       required: false,
-      default: false,
+      default: false
     },
     // 自定义返回字段，默认返回 id
     customReturnField: {
       type: String,
-      default: '',
+      default: ''
     },
     backDepart: {
       type: Boolean,
       default: false,
-      required: false,
+      required: false
     },
     // 存储字段 [key field]
     store: {
       type: String,
       default: 'id',
-      required: false,
+      required: false
     },
     // 显示字段 [label field]
     text: {
       type: String,
       default: 'departName',
-      required: false,
+      required: false
     },
     treeOpera: {
       type: Boolean,
       default: false,
-      required: false,
-    },
+      required: false
+    }
   },
   data() {
     return {
       visible: false,
       confirmLoading: false,
       storeVals: '', //[key values]
-      textVals: '', //[label values]
+      textVals: '' //[label values]
     }
   },
   computed: {
@@ -100,7 +103,7 @@ export default {
     },
     textField() {
       return underLinetoHump(this.text)
-    },
+    }
   },
   mounted() {
     this.storeVals = this.value
@@ -109,6 +112,13 @@ export default {
     value(val) {
       this.storeVals = val
     },
+    role() {
+      // console.log('ddd')
+      this.textVals = undefined
+    }
+    // textVals(n, o) {
+    //   console.log('new: ',n, '---', o)
+    // }
   },
   methods: {
     initComp(textVals) {
@@ -124,7 +134,7 @@ export default {
           for (let i = 0; i < arr1.length; i++) {
             info.push({
               value: arr1[i],
-              text: arr2[i],
+              text: arr2[i]
             })
           }
           this.$emit('back', info)
@@ -132,6 +142,7 @@ export default {
       }
     },
     openModal() {
+      console.log(this.alldepart)
       this.$refs.innerDepartSelectModal.show()
     },
     handleOK(rows) {
@@ -156,12 +167,12 @@ export default {
     },
     handleEmpty() {
       this.handleOK('')
-    },
+    }
   },
   model: {
     prop: 'value',
-    event: 'change',
-  },
+    event: 'change'
+  }
 }
 </script>
 

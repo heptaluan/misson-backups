@@ -3,28 +3,43 @@
     <!-- 查询区域 -->
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
-        <a-row :gutter="24" class="search-group">
-          <a-col class="group">
-            <a-form-item label="医院名称">
-              <a-input allowClear v-model="queryParam.hospitalName" placeholder="请输入医院名称"></a-input>
+        <a-row :gutter='24' class='search-group'>
+          <a-col class='group'>
+            <a-form-item label='医院名称'>
+              <a-input allowClear v-model='queryParam.departName' placeholder='请输入医院名称'></a-input>
             </a-form-item>
           </a-col>
-          <a-col class="group">
-            <a-form-item label="渠道商">
-              <a-input allowClear v-model="queryParam.relateAccess" placeholder="请输入渠道商名称"></a-input>
+          <a-col class='group'>
+            <a-form-item label='联系电话'>
+              <a-input allowClear v-model='queryParam.mobile' placeholder='请输入联系电话'></a-input>
             </a-form-item>
           </a-col>
-          <!-- <div class="group">
-            <div class="title">省份：</div>
-            <j-dict-select-tag
-              allowClear
-              style="width:200px;"
-              type="list"
-              dictCode="sample_quality_status"
-              placeholder="请选择省份"
-              v-model="queryParam.status"
-            />
-          </div> -->
+          <!--          <a-col class='group md'>-->
+          <!--            <a-form-item label='渠道商' prop='agencyId'>-->
+          <!--              <a-select v-model='queryParam.relateAccess' placeholder='请选择渠道商'-->
+          <!--                        show-search-->
+          <!--                        :value='channelValue'-->
+          <!--                        :default-active-first-option='false'-->
+          <!--                        :filter-option='false'-->
+          <!--                        :not-found-content='null'-->
+          <!--                        @search='handleChannelSearch'-->
+          <!--                        @change='handleChannelChange'>-->
+          <!--                <a-select-option v-for='item in distributorList' :key='item.id' :value='item.departNameAbbr'>-->
+          <!--                  {{ item.departName }}-->
+          <!--                </a-select-option>-->
+          <!--              </a-select>-->
+          <!--            </a-form-item>-->
+          <!--          </a-col>-->
+          <a-col class="group oneLine"></a-col>
+          <a-col class="group">
+            <a-form-item label="地区">
+              <a-radio-group v-model="queryParam.regionProvince">
+                <a-radio-button :value="item.code" v-for="item in regionOptions" :key="item.code">
+                  {{ item.name }}
+                </a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
           <a-col class="group btn">
             <a-button @click="searchQuery" type="primary">搜索</a-button>
             <a-button @click="resetQuery">重置</a-button>
@@ -32,7 +47,6 @@
         </a-row>
       </a-form>
     </div>
-
     <!-- 操作按钮区域 -->
     <div class="table-operator">
       <a-button @click="handleShowDistributorModal" type="primary" icon="plus">创建医院</a-button>
@@ -104,8 +118,9 @@
           </a-button>
         </template>
 
-        <span slot="action" slot-scope="text, record">
-          <a @click="handleShowDistributorModal(record)">查看详情</a>
+        <span slot="action" slot-scope="text, record" style="display: flex;justify-content: space-evenly;">
+          <a @click="handleShowDistributorModal(record, false)">查看详情</a>
+          <a @click="handleShowDistributorModal(record, true)">编辑</a>
 
           <!-- <a-divider type="vertical" />
           <a-dropdown>
@@ -125,6 +140,7 @@
       </a-table>
     </div>
 
+<!--    <AddHospitalModal ref="modalForm" :regionData='originalRegion' @ok="modalFormOk" />-->
     <AddHospitalModal ref="modalForm" @ok="modalFormOk" />
   </a-card>
 </template>
@@ -133,49 +149,14 @@
 import '@/assets/less/TableExpand.less'
 import { mixinDevice } from '@/utils/mixin'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
+// import { commonFunctionsMixin } from '@/mixins/commonFunctionsMixin'
 import AddHospitalModal from './modules/AddHospitalModal'
-import { queryRoleUsers } from '../../api/material/index'
-
-function fetch(value, callback) {
-  let timeout
-  let currentValue
-
-  if (timeout) {
-    clearTimeout(timeout)
-    timeout = null
-  }
-  currentValue = value
-
-  function fake() {
-    queryRoleUsers({
-      role: 'sell_user',
-      name: value
-    }).then(res => {
-      if (res.success) {
-        if (currentValue === value) {
-          const result = res.result
-          const data = []
-          result.forEach(r => {
-            data.push({
-              key: r.id,
-              realname: r.realname,
-              id: r.id
-            })
-          })
-          callback(data)
-        }
-      } else {
-        console.log(res.message)
-      }
-    })
-  }
-
-  timeout = setTimeout(fake, 300)
-}
+import { getRegionWithDepartment } from '@/api/api'
 
 export default {
   name: 'HospitalList',
-  mixins: [JeecgListMixin, mixinDevice],
+  mixins: [JeecgListMixin, mixinDevice, selectorFilterMixin],
   components: {
     AddHospitalModal
   },
@@ -196,7 +177,45 @@ export default {
         {
           title: '医院名称',
           align: 'center',
-          dataIndex: 'hospitalName'
+          dataIndex: 'departName'
+        },
+        {
+          title: '医院简称',
+          align: 'center',
+          dataIndex: 'departNameAbbr'
+        },
+        // {
+        //   title: '渠道商',
+        //   align: 'center',
+        //   dataIndex: 'relateAccess_dictText'
+        // },
+        // {
+        //   title: '科室',
+        //   align: 'center',
+        //   dataIndex: 'department'
+        // },
+        // {
+        //   title: '联系医生',
+        //   align: 'center',
+        //   dataIndex: 'contactDoctor'
+        // },
+        {
+          title: '联系电话',
+          align: 'center',
+          dataIndex: 'mobile'
+        },
+        {
+          title: '地区',
+          align: 'center',
+          dataIndex: 'zone',
+          customRender: function(t, r, index) {
+            return r.regionProvince_dictText + '/' + r.regionCity_dictText + '/' + r.regionCode_dictText
+          }
+        },
+        {
+          title: '详细地址',
+          align: 'center',
+          dataIndex: 'address'
         },
         {
           title: '统一信用代码',
@@ -204,39 +223,24 @@ export default {
           dataIndex: 'socialCode'
         },
         {
-          title: '科室',
-          align: 'center',
-          dataIndex: 'department'
-        },
-        {
-          title: '联系医生',
-          align: 'center',
-          dataIndex: 'contactDoctor'
-        },
-        {
-          title: '联系电话',
-          align: 'center',
-          dataIndex: 'contactPhone'
-        },
-        {
           title: '关联渠道商',
           align: 'center',
-          dataIndex: 'relateAccess'
+          dataIndex: 'chargeUsers_dictText'
         },
-        {
-          title: '地址',
-          align: 'center',
-          dataIndex: 'provinceCode',
-          customRender: function(t, r, index) {
-            let address = ''
-            if (t.districtCode) {
-              address = r.provinceCode + '-' + r.cityCode + '-' + r.districtCode
-            } else {
-              address = r.provinceCode + '-' + r.cityCode
-            }
-            return address
-          }
-        },
+        // {
+        //   title: '地址',
+        //   align: 'center',
+        //   dataIndex: 'provinceCode',
+        //   customRender: function(t, r, index) {
+        //     let address = ''
+        //     if (t.districtCode) {
+        //       address = r.provinceCode + '-' + r.cityCode + '-' + r.districtCode
+        //     } else {
+        //       address = r.provinceCode + '-' + r.cityCode
+        //     }
+        //     return address
+        //   }
+        // },
         {
           title: '创建人',
           align: 'center',
@@ -257,13 +261,18 @@ export default {
         }
       ],
       url: {
-        list: 'mission/businessAccess/queryAllHospital'
+        list: 'mission/businessAccess/hospitalList'
       },
       dictOptions: {},
       superFieldList: [],
-      queryParam: {},
-      data: [],
+      distributorList: [],
+      channelValue: undefined,
+      queryParam: {
+        orgCategory: 4000
+      },
+      // data: [],
       value: undefined,
+      regionOptions: null
     }
   },
   created() {
@@ -283,21 +292,33 @@ export default {
       this.superFieldList = fieldList
     },
     resetQuery() {
-      this.queryParam = {}
+      this.queryParam = { orgCategory: 4000 }
       this.loadData()
     },
-    handleShowDistributorModal(record) {
-      this.$refs.modalForm.edit(record)
-      this.$refs.modalForm.title = '新增'
+    handleShowDistributorModal(record, isEdit) {
+      this.$refs.modalForm.edit(record, isEdit)
+      if (!record.id) {
+        this.$refs.modalForm.title = '新增'
+      }
     },
-    handleSearch(value) {
-      fetch(value, data => (this.data = data))
+    loadRelatedRegion() {
+      const regionOfHospital = { dpCatalog: 4000, level: 1 }
+      getRegionWithDepartment(regionOfHospital).then(res => {
+        this.regionOptions = res.result
+      })
     },
-    handleChange(value) {
-      console.log(value)
-      this.value = value
-      fetch(value, data => (this.data = data))
+    modalFormOk() {
+      // 新增/修改 成功时，重载列表
+      this.loadData()
+      //清空列表选中
+      this.onClearSelected()
+      this.loadRelatedRegion()
     }
+  },
+  mounted() {
+    this.loadDistributorList()
+    this.loadRelatedRegion()
+    // this.initRegion()
   }
 }
 </script>
@@ -329,6 +350,20 @@ export default {
       margin-right: 10px;
       text-align: right;
       min-width: 45px;
+    }
+
+    /deep/ .ant-form-item-control {
+      height: auto;
+
+      .ant-radio-button-wrapper {
+        margin: 0 8px 8px 0;
+        border-radius: 4px !important;
+        border-left: 1px solid #d9d9d9;
+
+        &::before {
+          display: none !important;
+        }
+      }
     }
   }
 

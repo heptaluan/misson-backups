@@ -103,11 +103,21 @@ export const constantRouterMap = [
   {
     path: '/preview/:reportId',
     name: 'Preview',
-    component: () => import(/* webpackChunkName: "fail" */ '@/views/report/template/preview')
+    component: () => import(/* webpackChunkName: "fail" */ '@/views/reportTemplate/entrance/preview')
+  },
+  {
+    path: '/print-t800/:reportId',
+    name: 'PagePrintT800',
+    component: () => import(/* webpackChunkName: "fail" */ '@/views/report/print/index-T800')
   },
   {
     path: '/print/:reportId',
     name: 'PagePreview',
+    component: () => import(/* webpackChunkName: "fail" */ '@/views/report/print')
+  },
+  {
+    path: '/printSD/:reportId',
+    name: 'PagePreviewSD',
     component: () => import(/* webpackChunkName: "fail" */ '@/views/report/print')
   },
 ]

@@ -31,6 +31,7 @@ export default {
     },
   },
   methods: {
+
     // 条件渲染内容 span
     renderVNode() {
       if (this.vNode == null) {
@@ -70,18 +71,14 @@ export default {
       }
       if (layer === 'top') {
         // 最新渲染的在下面
-        options.style['z-index'] = 9999 - this.effectIdx
+        options.style['z-index'] = (9999 - this.effectIdx)
       }
       return this.$createElement('span', options, [vNode])
     },
   },
   render(h) {
-    return h(
-      'div',
-      {
-        class: ['j-vxe-reload-effect-box'],
-      },
-      [this.renderVNode()]
-    )
+    return h('div', {
+      class: ['j-vxe-reload-effect-box'],
+    }, [this.renderVNode()])
   },
 }

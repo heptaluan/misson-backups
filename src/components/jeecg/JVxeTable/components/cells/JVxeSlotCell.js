@@ -28,7 +28,7 @@ export default {
     },
   },
   render(h) {
-    let { slot } = this.renderOptions
+    let {slot} = this.renderOptions
     if (slot) {
       return h('div', {}, slot(this.slotProps))
     } else {
@@ -38,9 +38,9 @@ export default {
   // 【组件增强】注释详见：JVxeCellMixins.js
   enhanced: {
     switches: {
-      editRender: false,
+      editRender: false
     },
-  },
+  }
 }
 
 // :isNotPass="notPassedIds.includes(col.key+row.id)"

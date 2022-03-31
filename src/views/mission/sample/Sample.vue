@@ -84,7 +84,7 @@
             <a @click="showDetail(record)">{{
               record.status === 5
                 ? '查看'
-                : record.status === 4 || record.status === 2 || record.status === 3
+                : record.status === 1 || record.status === 4 || record.status === 2 || record.status === 3
                 ? '质控'
                 : ''
             }}</a>

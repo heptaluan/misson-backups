@@ -10,39 +10,27 @@
               <a-input placeholder="请输入入库单号" v-model="queryParam.batchNo"></a-input>
             </a-form-item>
           </a-col>
-          <a-col class="group md">
-            <a-form-item label="入库时间" :labelCol="{ span: 5 }">
-              <j-date
-                v-model="queryParam.createTime_begin"
-                :showTime="true"
-                date-format="YYYY-MM-DD"
-                placeholder="请选择开始时间"
-              ></j-date>
-              <span style="width: 10px;"> - </span>
-              <j-date
-                v-model="queryParam.createTime_end"
-                :showTime="true"
-                date-format="YYYY-MM-DD"
-                placeholder="请选择结束时间"
-              ></j-date>
-            </a-form-item>
-          </a-col>
-          <a-col class="group sm" >
-            <a-form-item label="状态" :labelCol="{ span: 5 }">
-              <a-select v-model="queryParam.status" placeholder="请选择产品状态">
+          <a-col class='group sm'>
+            <a-form-item label='状态' :labelCol='{ span: 5 }'>
+              <a-select v-model='queryParam.status' placeholder='请选择产品状态'>
                 <a-select-option
-                  v-for="item in productStatus"
-                  :key="item.key"
-                  :value="item.key"
+                  v-for='item in productStatus'
+                  :key='item.key'
+                  :value='item.key'
                 >
                   {{ item.value }}
                 </a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
-          <a-col class="group btn">
-            <a-button type="primary" @click="searchQuery">查询</a-button>
-            <a-button @click="searchReset">重置</a-button>
+          <a-col class='group md'>
+            <a-form-item label='入库时间' :labelCol='{ span: 5 }'>
+              <a-range-picker @change='onTimeChange' allowClear v-model='queryParam.datePick' />
+            </a-form-item>
+          </a-col>
+          <a-col class='group btn'>
+            <a-button type='primary' @click='searchQuery'>查询</a-button>
+            <a-button @click='searchReset'>重置</a-button>
           </a-col>
         </a-row>
       </a-form>
@@ -194,6 +182,10 @@ export default {
     },
     handleStockIn() {
       this.$refs.stockInModal.show()
+    },
+    onTimeChange(date, dateString) {
+      this.queryParam.createTime_begin = dateString[0]
+      this.queryParam.createTime_end = dateString[1]
     }
   }
 }

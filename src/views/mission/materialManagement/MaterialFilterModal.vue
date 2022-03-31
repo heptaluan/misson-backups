@@ -21,7 +21,11 @@
             </a-col>
             <a-col class="group">
               <a-form-item label="所属产品" :labelCol="{ span: 8 }">
-                <a-input allowClear v-model="queryParam.productRecognition" placeholder="请输入所属产品"></a-input>
+                <a-select v-model="queryParam.productRecognition" placeholder="请选择所属产品" style="width:190px;">
+                  <a-select-option v-for="item in productInfoList" :key="item.id" :value="item.productRecognition">
+                    {{ item.productName }}
+                  </a-select-option>
+                </a-select>
               </a-form-item>
             </a-col>
             <a-col class="group btn">
@@ -102,6 +106,7 @@
 <script>
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
 import { mixinDevice } from '@/utils/mixin'
+import { getProductInfoList } from '../../../api/product/index'
 
 export default {
   name: 'StockInModal',
@@ -167,7 +172,8 @@ export default {
         deleteBatch: '/mission/materialManagement/deleteBatch',
         exportXlsUrl: '/mission/materialManagement/exportXls',
         importExcelUrl: 'mission/materialManagement/importExcel'
-      }
+      },
+      productInfoList: [],
     }
   },
   created() {
@@ -175,7 +181,7 @@ export default {
   },
   methods: {
     resetQuery() {
-      this.queryParam = {}
+      this.cleanData()
       this.loadData()
     },
     show() {
@@ -184,10 +190,17 @@ export default {
     handleCancel() {
       console.log(`取消`)
       this.visible = false
+      this.resetQuery()
     },
     handleOk() {
       this.$emit('ok', this.selectionRows)
       this.visible = false
+      this.resetQuery()
+    },
+    cleanData() {
+      this.queryParam = {}
+      this.selectionRows = []
+      this.selectedRowKeys = []
     },
     getSuperFieldList() {
       let fieldList = []
@@ -199,10 +212,22 @@ export default {
       fieldList.push({ type: 'string', value: 'remark', text: '备注', dictCode: '' })
       this.superFieldList = fieldList
     },
-    handleAddMaterial() {}
+    handleAddMaterial() {},
+    loadProductInfoList() {
+      const that = this
+      getProductInfoList().then(res => {
+        if (res.success) {
+          that.productInfoList = res.result.records
+          console.log(that.productInfoList)
+        } else {
+          that.$message.warning(res.message)
+        }
+      })
+    }
   },
   mounted() {
     this.loadData()
+    this.loadProductInfoList()
   }
 }
 </script>

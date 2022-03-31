@@ -160,7 +160,7 @@ export default {
           align: 'center',
           dataIndex: 'materialName',
           customRender: function(t, r, index) {
-            return r.materialName ? r.materialName : r.materialId_dictText
+            return r.materialName ? r.materialName : r.materialCode_dictText
           }
         },
         {
@@ -274,25 +274,25 @@ export default {
           }
 
           for (let i = 0; i < this.dataSource.length; i++) {
-            if (parseInt(this.dataSource[i].pcs) <= 0) {
+            if (!this.dataSource[i].pcs) {
               this.$message.error(`请输入份数`)
-              return
+              return false
             }
 
-            if (this.dataSource[i].sampleType === '') {
+            if (!this.dataSource[i].sampleType) {
               this.$message.error(`请选择样本类别`)
-              return
+              return false
             }
 
-            if (this.dataSource[i].units === '') {
+            if (!this.dataSource[i].units) {
               this.$message.error(`请输入规格`)
-              return
+              return false
             }
 
-            if (this.dataSource[i].suffix === '') {
-              this.$message.error(`请输入自定义后缀`)
-              return
-            }
+            // if (this.dataSource[i].suffix === '') {
+            //   this.$message.error(`请输入自定义后缀`)
+            //   return
+            // }
 
             if (this.id) {
               postData.materialPlanItemList.push({
@@ -398,11 +398,13 @@ export default {
 .add-btn {
   margin-right: 15px;
 }
+
 .form-state {
   position: absolute;
   top: 70px;
   right: 35px;
 }
+
 .footer-bar {
   margin-top: 10px;
   padding: 10px 30px;
@@ -417,15 +419,19 @@ export default {
   display: flex;
   align-items: center;
 }
+
 .footer-bar .ant-btn {
   margin-right: 15px;
 }
+
 .footer-bar .flex-1 {
   flex: 1;
 }
+
 .tool-bar {
   margin-bottom: 15px;
 }
+
 .action-btn {
   padding: 5px 10px;
 }

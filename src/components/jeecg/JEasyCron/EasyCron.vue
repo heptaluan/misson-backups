@@ -26,40 +26,41 @@
           </a-tab-pane>
         </a-tabs>
       </div>
-      <a-divider />
+      <a-divider/>
       <!-- 执行时间预览 -->
       <a-row :gutter="8">
-        <a-col :span="18" style="margin-top: 22px">
+        <a-col :span="18" style="margin-top: 22px;">
           <a-row :gutter="8">
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="秒" v-model="inputValues.second" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="秒" v-model="inputValues.second" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="分" v-model="inputValues.minute" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="分" v-model="inputValues.minute" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="时" v-model="inputValues.hour" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="时" v-model="inputValues.hour" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="日" v-model="inputValues.day" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="日" v-model="inputValues.day" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="月" v-model="inputValues.month" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="月" v-model="inputValues.month" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="周" v-model="inputValues.week" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="周" v-model="inputValues.week" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="8" style="margin-bottom: 8px">
-              <a-input addon-before="年" v-model="inputValues.year" @blur="onInputBlur" />
+            <a-col :span="8" style="margin-bottom: 8px;">
+              <a-input addon-before="年" v-model="inputValues.year" @blur="onInputBlur"/>
             </a-col>
-            <a-col :span="16" style="margin-bottom: 8px">
-              <a-input addon-before="Cron" v-model="inputValues.cron" @blur="onInputCronBlur" />
+            <a-col :span="16" style="margin-bottom: 8px;">
+              <a-input addon-before="Cron" v-model="inputValues.cron" @blur="onInputCronBlur"/>
             </a-col>
           </a-row>
         </a-col>
         <a-col :span="6">
+
           <div>近十次执行时间（不含年）</div>
-          <a-textarea type="textarea" :value="preTimeList" :rows="5" />
+          <a-textarea type="textarea" :value="preTimeList" :rows="5"/>
         </a-col>
       </a-row>
     </div>
@@ -89,29 +90,29 @@ export default {
     DayUi,
     WeekUi,
     MonthUi,
-    YearUi,
+    YearUi
   },
   props: {
     cronValue: {
       type: String,
-      default: '',
+      default: ''
     },
     disabled: {
       type: Boolean,
-      default: false,
+      default: false
     },
     hideSecond: {
       type: Boolean,
-      default: false,
+      default: false
     },
     hideYear: {
       type: Boolean,
-      default: false,
+      default: false
     },
     remote: {
       type: Function,
-      default: null,
-    },
+      default: null
+    }
   },
   data() {
     return {
@@ -123,7 +124,7 @@ export default {
       month: '*',
       week: '?',
       year: '*',
-      inputValues: { second: '', minute: '', hour: '', day: '', month: '', week: '', year: '', cron: '' },
+      inputValues: {second: '', minute: '', hour: '', day: '', month: '', week: '', year: '', cron: ''},
       preTimeList: '执行预览，会忽略年份参数',
     }
   },
@@ -144,7 +145,7 @@ export default {
       if (this.hideYear || this.hideSecond) return v
       const vs = v.split(' ')
       return vs.slice(0, vs.length - 1).join(' ')
-    },
+    }
   },
   watch: {
     cronValue(newVal, oldVal) {
@@ -213,7 +214,7 @@ export default {
     },
     formatValue() {
       if (!this.cronValue) return
-      const values = this.cronValue.split(' ').filter((item) => !!item)
+      const values = this.cronValue.split(' ').filter(item => !!item)
       if (!values || values.length <= 0) return
       let i = 0
       if (!this.hideSecond) this.second = values[i++]
@@ -231,14 +232,14 @@ export default {
     calTriggerListInner() {
       // 设置了回调函数
       if (this.remote) {
-        this.remote(this.cronValue_c, +new Date(), (v) => {
+        this.remote(this.cronValue_c, +new Date(), v => {
           this.preTimeList = v
         })
         return
       }
       const format = 'yyyy-MM-dd hh:mm:ss'
       const options = {
-        currentDate: dateFormat(new Date(), format),
+        currentDate: dateFormat(new Date(), format)
       }
       const iter = CronParser.parseExpression(this.cronValue_c2, options)
       const result = []
@@ -247,7 +248,7 @@ export default {
       }
       this.preTimeList = result.length > 0 ? result.join('\n') : '无执行时间'
     },
-    onInputBlur() {
+    onInputBlur(){
       this.second = this.inputValues.second
       this.minute = this.inputValues.minute
       this.hour = this.inputValues.hour
@@ -256,23 +257,25 @@ export default {
       this.week = this.inputValues.week
       this.year = this.inputValues.year
     },
-    onInputCronBlur(event) {
+    onInputCronBlur(event){
       this.$emit('change', event.target.value)
     },
   },
   model: {
     prop: 'cronValue',
-    event: 'change',
+    event: 'change'
   },
 }
 </script>
 
 <style scoped lang="less">
-.j-easy-cron {
-  /deep/ .content {
-    .ant-checkbox-wrapper + .ant-checkbox-wrapper {
-      margin-left: 0;
+  .j-easy-cron {
+
+    /deep/ .content {
+      .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+        margin-left: 0;
+      }
     }
+
   }
-}
 </style>

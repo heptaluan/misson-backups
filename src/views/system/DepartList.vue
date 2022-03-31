@@ -5,7 +5,7 @@
 
         <!-- 按钮操作区域 -->
         <a-row style="margin-left: 14px">
-          <a-button @click="handleAdd(1)" type="primary">添加部门</a-button>
+          <a-button @click='handleAdd(1)' type='primary'>添加机构</a-button>
           <a-button @click="handleAdd(2)" type="primary">添加下级</a-button>
           <a-button type="primary" icon="download" @click="handleExportXls('部门信息')">导出</a-button>
           <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
@@ -21,7 +21,7 @@
               <a v-if="this.currSelected.title" style="margin-left: 10px" @click="onClearSelected">取消选择</a>
             </div>
           </a-alert>
-          <a-input-search @search="onSearch" style="width:100%;margin-top: 10px" placeholder="请输入部门名称"/>
+          <a-input-search @search='onSearch' style='width:100%;margin-top: 10px' placeholder='请输入机构名称' />
           <!-- 树-->
           <a-col :md="10" :sm="24">
             <template>
@@ -78,14 +78,14 @@
               <a-form-model-item :labelCol="labelCol" :wrapperCol="wrapperCol" prop="departName" label="机构名称">
                 <a-input placeholder="请输入机构/部门名称" v-model="model.departName" />
               </a-form-model-item>
-              <a-form-model-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="上级部门">
+              <a-form-model-item :labelCol='labelCol' :wrapperCol='wrapperCol' label='上级机构'>
                 <a-tree-select
-                  style="width:100%"
+                  style='width:100%'
                   :dropdownStyle="{maxHeight:'200px',overflow:'auto'}"
-                  :treeData="treeData"
-                  :disabled="disable"
-                  v-model="model.parentId"
-                  placeholder="无">
+                  :treeData='treeData'
+                  :disabled='disable'
+                  v-model='model.parentId'
+                  placeholder='无'>
                 </a-tree-select>
               </a-form-model-item>
               <a-form-model-item :labelCol="labelCol" :wrapperCol="wrapperCol" prop="orgCode" label="机构编码">
@@ -100,16 +100,26 @@
                   </a-radio-group>
                 </template>
                 <template v-else>
-                  <a-radio-group v-model="model.orgCategory" placeholder="请选择机构类型">
-                    <a-radio value="2">
-                      部门
+                  <a-radio-group v-model='model.orgCategory' placeholder='请选择机构类型'>
+                    <a-radio value='3000'>
+                      渠道商
                     </a-radio>
-                    <a-radio value="3">
-                      岗位
+                    <a-radio value='4000'>
+                      医院
                     </a-radio>
                   </a-radio-group>
                 </template>
               </a-form-model-item>
+              <!--              <a-form-model-item :labelCol="labelCol" :wrapperCol="wrapperCol" prop="subDepartType" label="部门类型">-->
+              <!--                  <a-radio-group v-model='model.subDepartType' placeholder='请选择部门类型'>-->
+              <!--                    <a-radio value='1'>-->
+              <!--                      部门-->
+              <!--                    </a-radio>-->
+              <!--                    <a-radio value='2'>-->
+              <!--                      岗位-->
+              <!--                    </a-radio>-->
+              <!--                  </a-radio-group>-->
+              <!--              </a-form-model-item>-->
               <a-form-model-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="排序">
                 <a-input-number v-model="model.departOrder" />
               </a-form-model-item>
@@ -130,12 +140,12 @@
           </a-card>
           <a-card v-else >
             <a-empty>
-              <span slot="description"> 请先选择一个部门! </span>
+              <span slot='description'> 请先选择一个机构! </span>
             </a-empty>
           </a-card>
         </a-tab-pane>
-        <a-tab-pane tab="部门权限" key="2" forceRender>
-          <depart-auth-modal ref="departAuth"/>
+        <a-tab-pane tab='机构权限' key='2' forceRender>
+          <depart-auth-modal ref='departAuth' />
         </a-tab-pane>
       </a-tabs>
 
@@ -145,8 +155,8 @@
 </template>
 <script>
   import DepartModal from './modules/DepartModal'
-  import {queryDepartTreeList, searchByKeywords, deleteByDepartId} from '@/api/api'
-  import {httpAction, deleteAction} from '@/api/manage'
+  import { queryDepartTreeList, queryDepartTreeListByOrgType, searchByKeywords, deleteByDepartId } from '@/api/api'
+  import { httpAction, deleteAction } from '@/api/manage'
   import {JeecgListMixin} from '@/mixins/JeecgListMixin'
   import DepartAuthModal from './modules/DepartAuthModal'
   // 表头
@@ -233,10 +243,10 @@
           edges: []
         },
         validatorRules: {
-          departName: [{required: true, message: '请输入机构/部门名称!'}],
-          orgCode: [{required: true, message: '请输入机构编码!'}],
-          orgCategory:[{required: true, message: '请输入机构类型!'}],
-          mobile:[{validator: this.validateMobile}]
+          departName: [{ required: true, message: '请输入机构名称!' }],
+          orgCode: [{ required: true, message: '请输入机构编码!' }],
+          orgCategory: [{ required: true, message: '请输入机构类型!' }],
+          mobile: [{ validator: this.validateMobile }]
         },
         url: {
           delete: '/sys/sysDepart/delete',
@@ -261,16 +271,19 @@
         var that = this
         that.treeData = []
         that.departTree = []
+        // get all organizes with '公司' type
+        const orgType = { catalog: 1 }
+        // queryDepartTreeListByOrgType(orgType).then((res) => {
         queryDepartTreeList().then((res) => {
           if (res.success) {
             //部门全选后，再添加部门，选中数量增多
-            this.allTreeKeys = [];
+            this.allTreeKeys = []
             for (let i = 0; i < res.result.length; i++) {
               let temp = res.result[i]
               that.treeData.push(temp)
               that.departTree.push(temp)
               that.setThisExpandedKeys(temp)
-              that.getAllKeys(temp);
+              that.getAllKeys(temp)
               // console.log(temp.id)
             }
             this.loading = false
@@ -463,7 +476,7 @@
         } else if (num == 2) {
           let key = this.currSelected.key
           if (!key) {
-            this.$message.warning('请先点击选中上级部门！')
+            this.$message.warning('请先点击选中上级机构！')
             return false
           }
           this.$refs.departModal.add(this.selectedKeys)
@@ -550,7 +563,7 @@
         }
       }
       //---- author:os_chengtgen -- date:20190827 --  for:切换父子勾选模式 =======------
-      
+
     },
     created() {
       this.currFlowId = this.$route.params.id

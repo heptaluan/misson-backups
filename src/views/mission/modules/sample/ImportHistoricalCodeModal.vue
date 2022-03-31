@@ -1,10 +1,18 @@
 <template>
   <j-modal :title="title" :width="width" :visible="visible" @ok="handleOk" @cancel="handleCancel">
     <a-form-model :model="form" ref="form" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rules">
-      <a-form-model-item label="渠道商" prop="agencyShortName">
-        <a-select v-model="form.agencyShortName" placeholder="请选择渠道商">
-          <a-select-option v-for="item in distributorList" :key="item.id" :value="item.shortName">
-            {{ item.accessName }}
+      <a-form-model-item label='渠道商' prop='agencyShortName'>
+        <a-select v-model='form.agencyShortName' placeholder='请选择渠道商'
+                  show-search
+                  allowClear
+                  :value='channelValue'
+                  :default-active-first-option='false'
+                  :filter-option='false'
+                  :not-found-content='null'
+                  @search='handleChannelSearch'
+                  @change='handleChannelChange'>
+          <a-select-option v-for='item in distributorList' :key='item.id' :value='item.departNameAbbr'>
+            {{ item.departName }}
           </a-select-option>
         </a-select>
       </a-form-model-item>
@@ -28,10 +36,12 @@
 
 <script>
 import { CommonSingleUpload, uploadHistoryCaseBarcode } from 'src/api/order/index'
-import { getDistributorList } from '../../../../api/product/index'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
+
 
 export default {
   name: 'ImportHistoricalCodeModal',
+  mixins: [selectorFilterMixin],
   data() {
     return {
       title: '历史编号导入',
@@ -48,6 +58,8 @@ export default {
       tplFile: undefined,
       fileInfoId: '',
       distributorList: [],
+      channelValue: undefined,
+      isUploaded: false,
       rules: {
         agencyShortName: [{ required: true, message: '请选择客户', trigger: 'change' }]
       }
@@ -96,6 +108,7 @@ export default {
             if (res.success) {
               that.$message.success(res.message)
               that.fileInfoId = res.result.id
+              that.isUploaded = true
             } else {
               that.$message.error(res.message)
             }
@@ -126,7 +139,12 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           that.confirmLoading = true
-          if (!that.fileList[0]) {
+          if (!this.isUploaded) {
+            that.$message.error('上传文件还未上传完成')
+            that.confirmLoading = false
+            return false
+          }
+          if (!that.fileList[0] || !this.isUploaded) {
             that.$message.error('上传文件不能为空')
             that.confirmLoading = false
             return false
@@ -139,6 +157,7 @@ export default {
               that.$message.success(res.message)
               this.$emit('ok')
               this.visible = false
+              that.isUploaded = false
             } else {
               that.$message.error(res.message)
             }
@@ -146,18 +165,6 @@ export default {
         }
       })
     },
-    loadDistributorList(value) {
-      const that = this
-      getDistributorList({
-        sellUser: value
-      }).then(res => {
-        if (res.success) {
-          that.distributorList = res.result.records
-        } else {
-          that.$message.warning(res.message)
-        }
-      })
-    }
   },
   mounted() {
     this.loadDistributorList()

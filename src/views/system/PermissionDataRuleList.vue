@@ -40,19 +40,28 @@
         </a-form>
 
         <a-table
-          ref="table"
-          rowKey="id"
-          size="middle"
-          :columns="columns"
-          :dataSource="dataSource"
-          :loading="loading"
-          :rowClassName="getRowClassname">
-          <span slot="action" slot-scope="text, record">
-            <a @click="handleEdit(record)">
-              <a-icon type="edit"/>编辑
+          ref='table'
+          rowKey='id'
+          size='middle'
+          :columns='columns'
+          :dataSource='dataSource'
+          :loading='loading'
+          :rowClassName='getRowClassname'>
+          <template slot='ruleType' slot-scope='text, record'>
+            <div v-if='record.ruleType == 0'>
+              数据可见性规则
+            </div>
+            <div v-else>
+              数据脱敏规则
+            </div>
+          </template>
+
+          <span slot='action' slot-scope='text, record'>
+            <a @click='handleEdit(record)'>
+              <a-icon type='edit' />编辑
             </a>
-            <a-divider type="vertical"/>
-            <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">
+            <a-divider type='vertical' />
+            <a-popconfirm title='确定删除吗?' @confirm='() => handleDelete(record.id)'>
               <a>删除</a>
             </a-popconfirm>
           </span>
@@ -85,9 +94,15 @@
       key: 'ruleValue'
     },
     {
+      title: '数据规则',
+      dataIndex: 'ruleType',
+      key: 'ruleType',
+      scopedSlots: { customRender: 'ruleType' }
+    },
+    {
       title: '操作',
       dataIndex: 'action',
-      scopedSlots: {customRender: 'action'},
+      scopedSlots: { customRender: 'action' },
       align: 'center'
     }
   ]
@@ -100,16 +115,16 @@
     data() {
       return {
         queryParam: {},
-        drawerWidth: 650,
+        drawerWidth: 850,
         columns: columns,
         permId: '',
         visible: false,
         form: this.$form.createForm(this),
         loading: false,
         url: {
-          list: "/sys/permission/getPermRuleListByPermId",
-          delete: "/sys/permission/deletePermissionRule",
-        },
+          list: '/sys/permission/getPermRuleListByPermId',
+          delete: '/sys/permission/deletePermissionRule'
+        }
       }
     },
     created() {
@@ -168,7 +183,7 @@
         if (screenWidth < 500) {
           this.drawerWidth = screenWidth
         } else {
-          this.drawerWidth = 650
+          this.drawerWidth = 960
         }
       },
       getRowClassname(record){

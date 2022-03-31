@@ -11,7 +11,7 @@ export const VALIDATE_FAILED = Symbol()
  **/
 export function getRefPromise(vm, name) {
   return new Promise((resolve) => {
-    ;(function next() {
+    (function next() {
       let ref = vm.$refs[name]
       if (ref) {
         resolve(ref)
@@ -28,8 +28,7 @@ export function getRefPromise(vm, name) {
 export function getInputNumberMaxValue(col, rowsValues) {
   let maxNum = 0
   Object.values(rowsValues).forEach((rowValue, index) => {
-    let val = rowValue[col.key],
-      num
+    let val = rowValue[col.key], num
     try {
       num = Number.parseFloat(val)
     } catch {
@@ -39,7 +38,7 @@ export function getInputNumberMaxValue(col, rowsValues) {
     if (index === 0) {
       maxNum = num
     } else {
-      maxNum = num > maxNum ? num : maxNum
+      maxNum = (num > maxNum) ? num : maxNum
     }
   })
   return maxNum
@@ -80,8 +79,7 @@ export function vxePackageToSuperQuery(columns, handler) {
     // 遍历列
     for (let i = 0; i < columns.length; i++) {
       let col = columns[i]
-      if (
-        col.type === JVXETypes.rowCheckbox ||
+      if (col.type === JVXETypes.rowCheckbox ||
         col.type === JVXETypes.rowRadio ||
         col.type === JVXETypes.rowExpand ||
         col.type === JVXETypes.rowNumber
@@ -132,14 +130,14 @@ export async function validateFormAndTables(form, cases, autoJumpTab) {
   let values = await new Promise((resolve, reject) => {
     // 验证主表表单
     form.validateFields((err, values) => {
-      err ? reject({ error: VALIDATE_FAILED, originError: err }) : resolve(values)
+      err ? reject({error: VALIDATE_FAILED, originError: err}) : resolve(values)
     })
   })
-  Object.assign(dataMap, { formValue: values })
+  Object.assign(dataMap, {formValue: values})
   // 验证所有子表的表单
   let subData = await validateTables(cases, autoJumpTab)
   // 合并最终数据
-  dataMap = Object.assign(dataMap, { tablesValue: subData })
+  dataMap = Object.assign(dataMap, {tablesValue: subData})
   return dataMap
 }
 
@@ -151,22 +149,22 @@ export async function validateFormAndTables(form, cases, autoJumpTab) {
  * @returns {Promise<any>}
  * @author sunjianlei
  */
-export async function validateFormModelAndTables(form, formData, cases, autoJumpTab) {
+export async function validateFormModelAndTables(form,formData, cases, autoJumpTab) {
   if (!(form && typeof form.validate === 'function')) {
     throw `form 参数需要的是一个form对象，而传入的却是${typeof form}`
   }
   let dataMap = {}
   let values = await new Promise((resolve, reject) => {
     // 验证主表表单
-    form.validate((valid, obj) => {
-      valid ? resolve(formData) : reject({ error: VALIDATE_FAILED, originError: valid })
+    form.validate((valid,obj) => {
+      valid ?resolve(formData): reject({error: VALIDATE_FAILED, originError: valid})
     })
   })
-  Object.assign(dataMap, { formValue: values })
+  Object.assign(dataMap, {formValue: values})
   // 验证所有子表的表单
   let subData = await validateTables(cases, autoJumpTab)
   // 合并最终数据
-  dataMap = Object.assign(dataMap, { tablesValue: subData })
+  dataMap = Object.assign(dataMap, {tablesValue: subData})
   return dataMap
 }
 
@@ -186,16 +184,18 @@ export function validateTables(cases, autoJumpTab = true) {
     if (!cases || cases.length === 0) {
       resolve()
     }
-    ;(function next() {
+    (function next() {
       let vm = cases[index]
-      vm.validateTable().then((errMap) => {
+      vm.validateTable().then(errMap => {
         // 校验通过
         if (!errMap) {
           tablesData[index] = vm.getAll()
           // 判断校验是否全部完成，完成返回成功，否则继续进行下一步校验
           if (++index === cases.length) {
             resolve(tablesData)
-          } else next()
+          } else (
+            next()
+          )
         } else {
           // 尝试获取tabKey，如果在ATab组件内即可获取
           let paneKey
@@ -209,7 +209,7 @@ export function validateTables(cases, autoJumpTab = true) {
             }
           }
           // 出现未验证通过的表单，不再进行下一步校验，直接返回失败
-          reject({ error: VALIDATE_FAILED, index, paneKey, errMap })
+          reject({error: VALIDATE_FAILED, index, paneKey, errMap})
         }
       })
     })()

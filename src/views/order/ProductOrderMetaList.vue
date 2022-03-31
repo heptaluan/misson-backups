@@ -4,97 +4,143 @@
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
         <a-row :gutter="24" class="search-group order-list">
-<!--          <div class="group">-->
-<!--            <div class="title">批量任务编号：</div>-->
-<!--            <a-input v-model="queryParam.importTaskId" placeholder="请输入批量任务编号"></a-input>-->
-<!--          </div>-->
-<!--          <div class="group">-->
-<!--            <div class="title">病例编号：</div>-->
-<!--            <a-input allowClear v-model="queryParam.medicalCaseCode" placeholder="请输入病例编号"></a-input>-->
-<!--          </div>-->
-          <a-col class="group sm">
-            <a-form-item label="姓名:" :labelCol="{ span: 6 }">
-              <a-input allowClear v-model="queryParam.caseName" placeholder="请输入姓名"></a-input>
+          <a-col class='group md'>
+            <a-form-item label='病例编号:' :labelCol='{ span: 6 }'>
+              <a-input allowClear v-model='queryParam.medicalCaseCode' placeholder='请输入病例编号'></a-input>
             </a-form-item>
           </a-col>
-          <a-col class="group tiny">
-            <a-form-item label="性别:" :labelCol="{ span: 6 }">
-              <a-select v-model="queryParam.gender" placeholder="请选择性别">
-                <a-select-option v-for="item in genderOption" :key="item.value" :value="item.value">
-                  {{ item.label }}
-                </a-select-option>
-              </a-select>
+          <a-col class='group md'>
+            <a-form-item label='姓名:' :labelCol='{ span: 6 }'>
+              <a-input allowClear v-model='queryParam.caseName' placeholder='请输入姓名'></a-input>
             </a-form-item>
           </a-col>
-          <a-col class="group md">
-            <a-form-item label="销售:" :labelCol="{ span: 6 }">
-              <a-select
-                show-search
-                :value="sellValue"
-                placeholder="输入关联销售进行检索"
-                :default-active-first-option="false"
-                :show-arrow="false"
-                :filter-option="false"
-                :not-found-content="null"
-                @search="handleSellSearch"
-                @change="handleSellChange"
-              >
-                <a-select-option v-for="item in sellData" :key="item.id" :value="item.username">
-                  {{ item.realname }}
-                </a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col>
-          <a-col class="group sm">
-            <a-form-item label="产品:" :labelCol="{ span: 6 }">
-              <a-select v-model="queryParam.choseProduct" placeholder="请选择产品">
-                <a-select-option v-for="item in productInfoList" :key="item.id" :value="item.productRecognition">
-                  {{ item.productName }}
-                </a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col>
-          <a-col class="group md">
-            <a-form-item label="医院:" :labelCol="{ span: 6 }">
-              <a-select v-model="queryParam.sendHospital" placeholder="请选择医院">
-                <a-select-option v-for="item in hospitalList" :key="item.id" :value="item.hospitalName">
-                  {{ item.hospitalName }}
-                </a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col>
+          <template v-if="toggleSearchStatus">
+            <a-col class='group md'>
+              <a-form-item label='性别:' :labelCol='{ span: 6 }'>
+                <a-select v-model='queryParam.gender' placeholder='请选择性别' allowClear>
+                  <a-select-option v-for='item in genderOption' :key='item.value' :value='item.value'>
+                    {{ item.label }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col class="group md">
+              <a-form-item label="证件号码:" :labelCol="{ span: 6 }">
+                <a-input allowClear v-model="queryParam.identityNumber" placeholder="请输入证件号码"></a-input>
+              </a-form-item>
+            </a-col>
+            <a-col class="group md">
+              <a-form-item label="电话:" :labelCol="{ span: 6 }">
+                <a-input allowClear v-model="queryParam.phoneNumber" placeholder="请输入电话"></a-input>
+              </a-form-item>
+            </a-col>
+            <a-col class="group md">
+              <a-form-item label="渠道商:" :labelCol="{ span: 6 }">
+                <a-select
+                  v-model="queryParam.sendAccess"
+                  placeholder="请选择渠道商"
+                  allowClear
+                  show-search
+                  :value="channelValue"
+                  :default-active-first-option="false"
+                  :filter-option="false"
+                  :not-found-content="null"
+                  @search="handleChannelSearch"
+                  @change="handleChannelChange"
+                >
+                  <a-select-option v-for="item in distributorList" :key="item.id" :value="item.departNameAbbr">
+                    {{ item.departName }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col class="group md">
+              <a-form-item label="医院:" :labelCol="{ span: 6 }">
+                <a-select v-model="queryParam.sendHospital" placeholder="请选择医院">
+                  <a-select-option v-for="item in hospitalList" :key="item.id" :value="item.departNameAbbr">
+                    {{ item.departName }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col class="group md">
+              <a-form-item label="销售:" :labelCol="{ span: 6 }">
+                <a-select
+                  show-search
+                  allowClear
+                  :value="sellValue"
+                  placeholder="输入关联销售进行检索"
+                  :default-active-first-option="false"
+                  :filter-option="false"
+                  :not-found-content='null'
+                  @focus='handleSellSearch'
+                  @search='handleSellSearch'
+                  @change="handleSellChange"
+                >
+                  <a-select-option v-for="item in sellData" :key="item.id" :value="item.username">
+                    {{ item.realname }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col class='group md'>
+              <a-form-item label='产品:' :labelCol='{ span: 6 }'>
+                <a-select v-model='queryParam.choseProduct' placeholder='请选择产品' allowClear>
+                  <a-select-option v-for='item in productInfoList' :key='item.id' :value='item.productRecognition'>
+                    {{ item.productName }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
 
-          <a-col class="group md">
-            <a-form-item label="状态:" :labelCol="{ span: 6 }">
-              <j-dict-select-tag
-                allowClear
-                type="list"
-                dictCode="product_order_state_enum"
-                placeholder="请选择状态"
-                v-model="queryParam.orderState"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col class="group md">
-            <a-form-item label="订单创建时间" :labelCol="{ span: 5 }" >
-              <j-date
-                v-model="queryParam.createTime_begin"
-                :showTime="true"
-                date-format="YYYY-MM-DD"
-                placeholder="请选择开始时间"
-              ></j-date>
-              <span style="width: 20px;"> - </span>
-              <j-date
-                v-model="queryParam.createTime_end"
-                :showTime="true"
-                date-format="YYYY-MM-DD"
-                placeholder="请选择结束时间"
-              ></j-date>
-            </a-form-item>
-          </a-col>
+            <a-col class='group omicsSelect md'>
+              <a-form-item label='组学:' :labelCol='{ span: 6 }'>
+                <a-select @change='getOmics' mode='multiple' v-model='omicsController' placeholder='请选择组学状态'>
+                  <a-select-opt-group v-for='(item, index) in omicsData'>
+                    <span slot='label'>{{ omicsName[index] }}</span>
+                    <a-select-option v-for='child in item'
+                                     :value="child['omicsStep'] + '-' + child['omics'] + '-' + child['bitCode']">
+                      {{ omicsName[index] }} - {{ child.stepDictText }}
+                    </a-select-option>
+                  </a-select-opt-group>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col class='group md'>
+              <a-form-item label='状态:' :labelCol='{ span: 6 }'>
+                <a-select v-model='queryParam.orderState' placeholder='请选择状态'>
+                  <a-select-option v-for='item in orderStateList' :key='item.id' :value='item.productMilestone'>
+                    {{ item.productMilestone_dictText }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col class='group md'>
+              <a-form-item label='订单来源:' :labelCol='{ span: 6 }'>
+                <j-dict-select-tag
+                  type='list'
+                  v-model='queryParam.sourceType'
+                  dictCode='order_source_type'
+                  placeholder='请选择来源'
+                />
+              </a-form-item>
+            </a-col>
+            <a-col class="group sm">
+              <a-form-item label="订单创建时间" :labelCol="{ span: 5 }">
+                <a-range-picker @change="onTimeChange" allowClear v-model="queryParam.datePick" />
+              </a-form-item>
+            </a-col>
+          </template>
+
           <a-col class="group btn">
             <a-button @click="searchQuery" type="primary">搜索</a-button>
             <a-button @click="resetQuery">重置</a-button>
+            <a @click="handleToggleSearch" style="margin-left: 8px">
+              {{ toggleSearchStatus ? '收起' : '展开' }}
+              <a-icon :type="toggleSearchStatus ? 'up' : 'down'" />
+            </a>
           </a-col>
         </a-row>
       </a-form>
@@ -104,45 +150,12 @@
     <!-- 操作按钮区域 -->
     <div class="table-operator">
       <a-button @click="addNewOrder" type="primary" icon="plus">创建订单</a-button>
-      <a-button type="primary" icon="download" @click="handleExportXls(`导出订单列表${currentTime}`)">导出Excel</a-button>
-<!--      <a-upload :showUploadList="false" :before-upload="beforeUpload" :customRequest="handleUpload">-->
-<!--        <a-button type="primary" icon="upload">批量导入订单</a-button>-->
-<!--      </a-upload>-->
-      <a-button type='primary' @click='batchImport'>批量导入订单</a-button>
-
-      <!-- <a-button type="primary" icon="download" @click="handleExportXls(`导出基因订单列表${currentTime}`)">导出基因Excel</a-button> -->
-      <!-- <a-upload
-        name="file"
-        :showUploadList="false"
-        :multiple="false"
-        :headers="tokenHeader"
-        :action="importExcelUrl"
-        @change="handleImportExcel"
-      >
-        <a-button type="primary" icon="import">导入</a-button>
-      </a-upload>
-      <j-super-query
-        :fieldList="superFieldList"
-        ref="superQueryModal"
-        @handleSuperQuery="handleSuperQuery"
-      ></j-super-query>
-      <a-dropdown v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay">
-          <a-menu-item key="1" @click="batchDel"><a-icon type="delete" />删除</a-menu-item>
-        </a-menu>
-        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down"/></a-button>
-      </a-dropdown> -->
+      <a-button type="primary" icon="download" @click="handleExport(`导出订单列表${currentTime}`)">导出Excel</a-button>
+      <a-button type="primary" @click="batchImport">批量导入订单</a-button>
     </div>
 
     <!-- table区域-begin -->
     <div>
-      <!-- <div class="ant-alert ant-alert-info" style="margin-bottom: 16px;">
-        <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择
-        <a style="font-weight: 600">{{ selectedRowKeys.length }}</a
-        >项
-        <a style="margin-left: 24px" @click="onClearSelected">清空</a>
-      </div> -->
-
       <a-table
         ref="table"
         size="middle"
@@ -157,33 +170,35 @@
         :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
         @change="handleTableChange"
       >
-        <template slot="check" slot-scope="text">
-          <span v-if='!text'>
-            <a-icon type="check" />
-          </span>
-        </template>
-        <template slot="imgSlot" slot-scope="text">
-          <span v-if="!text" style="font-size: 12px;font-style: italic;">无图片</span>
-          <img
-            v-else
-            :src="getImgView(text)"
-            height="25px"
-            alt=""
-            style="max-width:80px;font-size: 12px;font-style: italic;"
-          />
-        </template>
-        <template slot="fileSlot" slot-scope="text">
-          <span v-if="!text" style="font-size: 12px;font-style: italic;">无文件</span>
-          <a-button v-else :ghost="true" type="primary" icon="download" size="small" @click="downloadFile(text)">
-            下载
-          </a-button>
-        </template>
-
+        <!--        <template slot="check" slot-scope="text">-->
+        <!--          <span v-if="!text">-->
+        <!--            <a-icon type="check" />-->
+        <!--          </span>-->
+        <!--        </template>-->
+        <!--        <template slot="imgSlot" slot-scope="text">-->
+        <!--          <span v-if="!text" style="font-size: 12px;font-style: italic;">无图片</span>-->
+        <!--          <img-->
+        <!--            v-else-->
+        <!--            :src="getImgView(text)"-->
+        <!--            height="25px"-->
+        <!--            alt=""-->
+        <!--            style="max-width:80px;font-size: 12px;font-style: italic;"-->
+        <!--          />-->
+        <!--        </template>-->
+        <!--        <template slot="fileSlot" slot-scope="text">-->
+        <!--          <span v-if="!text" style="font-size: 12px;font-style: italic;">无文件</span>-->
+        <!--          <a-button v-else :ghost="true" type="primary" icon="download" size="small" @click="downloadFile(text)">-->
+        <!--            下载-->
+        <!--          </a-button>-->
+        <!--        </template>-->
         <span slot="action" slot-scope="text, record" style="display: flex;justify-content: space-evenly;">
           <a v-if="record.orderState === 1000" @click="editOrder(record)">编辑</a>
           <a v-if="record.orderState !== 1000" @click="handleDetail(record)">详情</a>
+          <a v-if="record.orderState !== 1000" @click="reinspection(record)">重检</a>
+          <a v-if='record.orderState === 9000 && record.checkReport === 1 && record.sourceType == 1'
+             @click='handleCheckReport(record)'>查看报告</a>
           <a-popconfirm
-            v-if="record.orderState === 1000"
+            v-if="record.orderState === 1000 || !record['isAnyStatus']"
             title="确定删除吗?"
             @confirm="() => handleDeleteOrder(record.id)"
           >
@@ -208,18 +223,27 @@
       </a-table>
     </div>
     <order-batch-import-modal ref="orderBatchImportModal" @ok="modalFormOk" />
+    <reinspectionModal ref="reinspectionModal" @ok="modalFormOk" />
+    <!--    <searchingModal ref="searchingModal" @sendOmicsData="getOmicsSearchingData"/>-->
   </a-card>
 </template>
 
 <script>
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
 import '@/assets/less/TableExpand.less'
-import { deleteTempleOrder } from 'src/api/order/index'
-import { getHospitalList, getProductInfoList, productAnalysisStepRelation } from '../../api/product/index'
+import { deleteTempleOrder, getTemplate } from 'src/api/order/index'
+import {
+  getHospitalList,
+  getProductInfoList,
+  getDistributorAllList,
+  productAnalysisStepRelation
+} from '../../api/product/index'
 import { queryRoleUsers } from '../../api/material'
 import { CommonSingleUpload, startOrderImportTask } from 'src/api/order/index'
-import {ajaxGetDictItems} from '@/api/api'
 import OrderBatchImportModal from './modules/orderBatchImportModal'
+import reinspectionModal from './modules/reinspectionModal'
+import { selectorFilterMixin } from '@/mixins/selectorFilterMixin'
+import { downFile } from '@/api/manage'
 
 function sellFetch(value, callback) {
   let timeout
@@ -259,40 +283,12 @@ function sellFetch(value, callback) {
   timeout = setTimeout(fake, 300)
 }
 
-const fakeList = {
-  dx: {
-    status: 2,
-    list: [
-      {code: 'dxrk', dic: 0},
-      {code: 'dxzk', dic: 1},
-      {code: 'dxsj', dic: 2},
-      {code: 'dxjg', dic: 3},
-    ]
-  },
-  bg: {
-    status: 2,
-    list: [
-      {code: 'bgtq', dic: 0},
-      {code: 'bgsce', dic: 1},
-      {code: 'bgjg', dic: 2},
-      {code: 'bgno', dic: 3},
-    ]
-  },
-  yx: {
-    status: 0,
-    list: [
-      {code: 'yxsc', dic: 0},
-      {code: 'yxfx', dic: 1},
-      {code: 'yxjg', dic: 2},
-    ]
-  }
-}
-
 export default {
   name: 'ProductOrderMetaList',
-  mixins: [JeecgListMixin],
+  mixins: [JeecgListMixin, selectorFilterMixin],
   components: {
     OrderBatchImportModal,
+    reinspectionModal
   },
   data() {
     return {
@@ -303,8 +299,9 @@ export default {
           title: '序号',
           dataIndex: '',
           key: 'rowIndex',
-          width: 60,
+          width: 10,
           align: 'center',
+          fixed: 'left',
           customRender: function(t, r, index) {
             return parseInt(index) + 1
           }
@@ -313,13 +310,17 @@ export default {
           title: '病例编号',
           align: 'center',
           dataIndex: 'medicalCaseCode',
+          fixed: 'left',
+          width: 10,
           sorter: (a, b) => a.medicalCaseCode - b.medicalCaseCode,
-          medicalCaseCode: ['descend', 'ascend'],
+          medicalCaseCode: ['descend', 'ascend']
         },
         {
           title: '姓名',
           align: 'center',
-          dataIndex: 'caseName'
+          width: 10,
+          dataIndex: 'caseName',
+          fixed: 'left'
         },
         {
           title: '性别',
@@ -337,24 +338,23 @@ export default {
           title: '年龄',
           align: 'center',
           dataIndex: 'age',
-          defaultSortOrder: 'descend',
-          sorter: (a, b) => a.age - b.age,
+          sorter: (a, b) => a.age - b.age
+        },
+        {
+          title: '证件号码',
+          align: 'center',
+          dataIndex: 'identityNumber'
+        },
+        {
+          title: '电话',
+          align: 'center',
+          dataIndex: 'phoneNumber'
         },
         {
           title: '产品',
           align: 'center',
           dataIndex: 'choseProduct_dictText'
         },
-        // {
-        //   title: '身份份证号',
-        //   align: 'center',
-        //   dataIndex: 'identityNumber'
-        // },
-        // {
-        //   title: '销售人员',
-        //   align: 'center',
-        //   dataIndex: 'seller_dictText'
-        // },
         {
           title: '渠道商',
           align: 'center',
@@ -363,7 +363,12 @@ export default {
         {
           title: '医院',
           align: 'center',
-          dataIndex: 'sendHospital'
+          dataIndex: 'sendHospital_dictText'
+        },
+        {
+          title: '销售人员',
+          align: 'center',
+          dataIndex: 'seller_dictText'
         },
         // {
         //   title: '送检科室',
@@ -377,84 +382,15 @@ export default {
         // },
         {
           title: '代谢组',
-          children: [
-            // {
-            //   title: '入库',
-            //   align: 'center',
-            //   dataIndex: 'dxrk',
-            //   customRender: (t, r) => this.checkMark('dx','dxrk',  r)
-            // },
-            // {
-            //   title: '质控',
-            //   align: 'center',
-            //   dataIndex: 'dxzk',
-            //   customRender: (t, r) => this.checkMark('dx','dxzk',  r)
-            // },
-            // {
-            //   title: '上机',
-            //   align: 'center',
-            //   dataIndex: 'dxsj',
-            //   customRender: (t, r) => this.checkMark('dx','dxsj',  r)
-            // },
-            // {
-            //   title: '报告',
-            //   align: 'center',
-            //   dataIndex: 'dxjg',
-            //   customRender: (t, r) => this.checkMark('dx','dxjg',  r)
-            // },
-          ]
-        },
-        {
-          title: '表观组',
-          children: [
-            // {
-            //   title: '提取',
-            //   align: 'center',
-            //   dataIndex: 'bgtq',
-            //   customRender: (t, r) => this.checkMark('bg','bgtq',  r)
-            // },
-            // {
-            //   title: '送测',
-            //   align: 'center',
-            //   dataIndex: 'bgsce',
-            //   customRender: (t, r) => this.checkMark('bg','bgsce',  r)
-            // },
-            // {
-            //   title: '数据',
-            //   align: 'center',
-            //   dataIndex: 'bgjg',
-            //   customRender: (t, r) => this.checkMark('bg','bgjg',  r)
-            // },
-            // {
-            //   title: '报告',
-            //   align: 'center',
-            //   dataIndex: 'bgno',
-            //   customRender: (t, r) => this.checkMark('bg','bgno',  r)
-            // },
-          ]
+          children: []
         },
         {
           title: '影像组',
-          children: [
-            // {
-            //   title: '上传',
-            //   align: 'center',
-            //   dataIndex: 'yxsc',
-            //   customRender: (t, r) => this.checkMark('yx','yxsc',  r)
-            // },
-            // {
-            //   title: '分析',
-            //   align: 'center',
-            //   dataIndex: 'yxfx',
-            //   customRender: (t, r) => this.checkMark('yx','yxfx',  r)
-            // },
-            // {
-            //   title: '报告',
-            //   align: 'center',
-            //   dataIndex: 'yxjg',
-            //   customRender: (t, r) => this.checkMark('yx','yxjg',  r)
-            // },
-          ]
+          children: []
+        },
+        {
+          title: '表观组',
+          children: []
         },
         {
           title: '订单报告',
@@ -462,43 +398,128 @@ export default {
             {
               title: '生成',
               align: 'center',
-              dataIndex: 'bgsc'
+              dataIndex: 'mainOrderStates1',
+              customRender: function(t, r) {
+                // this.orderStateHandler(r, 8000)
+                if (r.mainOrderStates) {
+                  for (let i = 0; i < r.mainOrderStates.length; i++) {
+                    if (r.mainOrderStates[i].productMilestone === 8000) {
+                      if (r.mainOrderStates[i].stateResult === 1) {
+                        return <a-icon type="check-circle" class="green" />
+                      } else if (r.mainOrderStates[i].stateResult == 0) {
+                        return <a-icon type="close-circle" class="red" />
+                      } else if (r.mainOrderStates[i].stateResult == -1) {
+                        return ' '
+                      }
+                    }
+                  }
+                }
+              }
             },
             {
               title: '审核',
               align: 'center',
-              dataIndex: 'bgsh'
+              dataIndex: 'mainOrderStates2',
+              customRender: function(t, r) {
+                // this.orderStateHandler(r, 9000)
+                if (r.mainOrderStates) {
+                  for (let i = 0; i < r.mainOrderStates.length; i++) {
+                    if (r.mainOrderStates[i].productMilestone === 9000) {
+                      if (r.mainOrderStates[i].stateResult === 1) {
+                        r.checkReport = 1
+                        return <a-icon type="check-circle" class="green" />
+                      } else if (r.mainOrderStates[i].stateResult == 0) {
+                        r.checkReport = 0
+                        return <a-icon type="close-circle" class="red" />
+                      } else if (r.mainOrderStates[i].stateResult == -1) {
+                        r.checkReport = -1
+                        return ' '
+                      }
+                    }
+                  }
+                }
+              }
             }
           ]
         },
         {
           title: '预计完成时间',
           align: 'center',
-          dataIndex: 'exceptTime'
+          dataIndex: 'planCompletionTime'
         },
         {
           title: '实际完成时间',
           align: 'center',
-          dataIndex: 'reportTime'
+          dataIndex: 'actualCompletionTime'
+        },
+        {
+          title: () => {
+            return (
+              <div>
+                剩余完
+                <br />
+                成时间
+              </div>
+            )
+          },
+          align: 'center',
+          dataIndex: 'time',
+          customRender: function(t, r) {
+            const currentTime =
+              new Date().getFullYear().toString() +
+              '-' +
+              (new Date().getMonth() + 1 < 10
+                ? '0' + (new Date().getMonth() + 1)
+                : new Date().getMonth() + 1
+              ).toString() +
+              '-' +
+              (new Date().getDate() < 10 ? '0' + new Date().getDate() : new Date().getDate()).toString()
+            const startTime = new Date(r.planCompletionTime)
+            const endTime = new Date(currentTime)
+            const diffTime = (startTime - endTime) / (1000 * 60 * 60 * 24)
+            if (r.actualCompletionTime) {
+              return '-'
+            } else {
+              return diffTime + '天'
+            }
+          }
         },
         {
           title: '创建时间',
           align: 'center',
           dataIndex: 'createTime',
+          defaultSortOrder: 'descend',
           sorter: (a, b) => a.createTime - b.createTime,
-          medicalCaseCode: ['descend', 'ascend'],
+          medicalCaseCode: ['descend', 'ascend']
         },
         // {
         //   title: '完成时间',
         //   align: 'center',
         //   dataIndex: 'completeTime'
         // },
-        // {
-        //   title: '订单状态',
-        //   align: 'center',
-        //   dataIndex: 'orderState_dictText',
-        //   customCell: this.statusBackground
-        // },
+        {
+          title: '订单状态',
+          align: 'center',
+          dataIndex: 'orderState_dictText'
+        },
+        {
+          title: '来源',
+          align: 'center',
+          dataIndex: 'sourceType',
+          customRender: function(text) {
+            if (text === 0) {
+              return '门诊'
+            } else if (text === 1) {
+              return '商检'
+            } else if (text === 2) {
+              return '科研'
+            } else if (text === 3) {
+              return '测试'
+            } else {
+              return ''
+            }
+          }
+        },
         {
           title: '操作',
           dataIndex: 'action',
@@ -512,21 +533,33 @@ export default {
         list: 'multiomics/productOrder/orderUserView',
         exportXlsUrl: 'multiomics/productOrder/exportOrderUserView'
       },
-      dictOptions: {},
       superFieldList: [],
       productInfoList: [],
       hospitalList: [],
-      stepRelation: null,
+      distributorList: [],
+      channelValue: undefined,
       user: null,
       sellData: [],
       sellValue: undefined,
-      fakeList: fakeList,
+      omicsData: null,
+      omicsController: undefined,
       orderStateList: [
-        {key: '临时订单', value: 1000},
-        {key: '未知订单', value: 2000},
-        {key: '正式订单', value: 3000},
+        { productMilestone_dictText: '临时订单', productMilestone: 1000 },
+        { productMilestone_dictText: '正式订单', productMilestone: 3000 },
+        { productMilestone_dictText: '报告生成', productMilestone: 8000 },
+        { productMilestone_dictText: '报告审核', productMilestone: 9000 }
       ],
-      currentTime: ''
+      currentTime: '',
+      omicsName: ['表观组', '代谢组', '影像组']
+      // orderResource: [
+      //   { key: 0, value: '门诊' },
+      //   { key: 1, value: '商检' },
+      //   { key: 2, value: '科研' }
+      // ]
+      // orderStateList: [
+      //   { key: 0, value: '已生成' },
+      //   { key: 1, value: '待审核' }
+      // ]
     }
   },
   created() {
@@ -540,6 +573,10 @@ export default {
   methods: {
     initDictConfig() {},
     getData() {},
+    onTimeChange(date, dateString) {
+      this.queryParam.createTime_begin = dateString[0]
+      this.queryParam.createTime_end = dateString[1]
+    },
     getSuperFieldList() {
       let fieldList = []
       fieldList.push({ type: 'string', value: 'sampleNo', text: '样本编号', dictCode: '' })
@@ -556,9 +593,33 @@ export default {
     handleDetail(record) {
       this.$router.push({ name: 'orderDetail', params: { id: record.id } })
     },
+    reinspection(record) {
+      this.$refs.reinspectionModal.show(record)
+    },
+    handleCheckReport(record) {
+      const that = this
+      getTemplate({
+        orderId: record.id
+      }).then(res => {
+        if (res.success) {
+          const rooterName = res.result.templateUrl || 'PagePreview'
+          const router = that.$router.resolve({
+            name: rooterName,
+            params: {
+              reportId: record.id
+            }
+          })
+          window.open(router.href, '_blank')
+        } else {
+          that.$message.warning(res.message)
+        }
+      })
+    },
     resetQuery() {
       this.queryParam = {}
-      this.sellValue = null;
+      this.omicsController = undefined
+      this.sellValue = undefined
+      this.loadDistributorList()
       this.loadData()
     },
     modalFormClose() {
@@ -567,13 +628,12 @@ export default {
     },
     addNewOrder() {
       this.$router.push({
-        path: '/orderList/addNewOrder'
+        path: '/orderList/singleNewOrder'
       })
     },
     editOrder(record) {
-      const step = record.lastEditStep ? record.lastEditStep : 0
       this.$router.push({
-        path: `/orderList/editNewOrder?orderId=${record.id}&currentTab=${step}`
+        path: `/orderList/singleNewOrder?orderId=${record.id}`
       })
     },
     handleDeleteOrder(id) {
@@ -593,16 +653,6 @@ export default {
         if (res.success) {
           that.productInfoList = res.result.records
           // console.log(that.productInfoList)
-        } else {
-          that.$message.warning(res.message)
-        }
-      })
-    },
-    loadHospitalList() {
-      getHospitalList().then(res => {
-        if (res.success) {
-          this.hospitalList = res.result.records
-          // console.log(this.hospitalList)
         } else {
           that.$message.warning(res.message)
         }
@@ -630,26 +680,34 @@ export default {
       this.currentTime = yy + mm + dd + hh + mf + ss
     },
     handleSellSearch(value) {
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
     },
     handleSellChange(value) {
       this.sellValue = value
-      if (!(this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics'))) {
+      if (!(this.user.includes('sales_omics') && !this.user.includes('sales_super_omics'))) {
         sellFetch(value, data => (this.sellData = data))
       }
-      this.$set(this.queryParam, 'sendAccess', undefined) // clean the previous data if the sellUser or sellUserId changed
+      // this.$set(this.queryParam, 'sendAccess', undefined) // clean the previous data if the sellUser or sellUserId changed
+      // this.$set(this.queryParam, 'sendHospital', undefined) // clean the previous data if the sellUser or sellUserId changed
+      // this.loadHospitalList()
       if (value) {
         this.queryParam.seller = value
+        this.loadDistributorList(null, value)
+      } else {
+        this.loadDistributorList()
       }
     },
     statusBackground(record) {
       return {
-        style: record.orderState_dictText === '报告完结' ? {
-          'background-color': 'green',
-          'color': 'white'
-        } : {}
+        style:
+          record.orderState_dictText === '报告完结'
+            ? {
+                'background-color': 'green',
+                color: 'white'
+              }
+            : {}
       }
     },
     beforeUpload(file) {
@@ -697,69 +755,132 @@ export default {
           console.log(e)
         })
     },
-    // loadOrderStateEnum() {
-    //   ajaxGetDictItems('omics_order_state_enum', null).then((res) => {
-    //     if (res.success) {
-    //       // console.log(res.result);
-    //       this.dictOptions = res.result;
-    //     }
-    //   })
-    // },
-    checkMark(category, stepName, record) {
-      // console.log(stepName,record);
-      const status = this.fakeList[category].status;
-      for (let i = 0; i < this.fakeList[category].list.length; i ++) {
-        if(stepName == this.fakeList[category].list[i].code) {
-          if(this.fakeList[category].list[i].dic <= status) {
-            return <a-icon type="check-circle" class='green'/>
+    checkMark(category, stepValue, record) {
+      for (let i = 0; i < record['omicsOrders'].length; i++) {
+        if (
+          category == record['omicsOrders'][i].omicsAnalysisType &&
+          stepValue === record['omicsOrders'][i].omicsMilestone
+        ) {
+          // the state of order should be larger than the step value of cell, then the icon will show up
+          if (record['omicsOrders'][i]['stateResult'] == 1) {
+            record['isAnyStatus'] = true
+            return <a-icon type="check-circle" class="green" />
+          } else if (record['omicsOrders'][i]['stateResult'] == 0) {
+            record['isAnyStatus'] = true
+            return <a-icon type="close-circle" class="red" />
+          } else if (record['omicsOrders'][i]['stateResult'] == -1) {
+            record['isAnyStatus'] = true
+            return ' '
           }
+        } else if (category === 0 && record.choseProduct === 'FA') {
+          return '——'
         }
       }
     },
     loadProductAnalysisStepRelation() {
-      productAnalysisStepRelation().then( res => {
-        console.log('res: ', res)
-        this.stepRelation = res.result
-        const st = res.result
-        const tt = [
-          {omics: 0, title: '代谢组'},
-          {omics: 1, title: '表观组'},
-          {omics: 2, title: '影像组'}
-        ]
-        let insertTableItem = []
-        // Object.for
-        for (let i = 0; i < st['FK'].length; i ++) {
-          insertTableItem[i]['title'] = tt[i]['title'];
-          insertTableItem[i]['omics'] = tt[i]['omics'];
-          for (let j = 0; j < st['FK'][i].length; j ++) {
-            insertTableItem[i][j] = {
-              title: st['FK'][i][j]['stepDictText'],
-              align: 'center',
-              dataIndex: st['FK'][i][j]['omicsStep'],
-              customRender: (t, r) => this.checkMark(st['FK'][i]['omics'], st['FK'][i][j]['omicsStep'], r)
+      productAnalysisStepRelation()
+        .then(res => {
+          const stepRelation = res.result['FK']
+          this.omicsData = res.result['FK']
+          const columnTitles = ['表观组', '代谢组', '影像组']
+          let insertTableItem = {}
+          const that = this
+          Object.keys(stepRelation).forEach(field => {
+            insertTableItem[field] = {}
+            insertTableItem[field]['title'] = columnTitles[field]
+            insertTableItem[field]['list'] = []
+            // connect the omics columns with dictionary
+            for (let i = 0; i < that.columns.length; i++) {
+              if (that.columns[i].title == insertTableItem[field]['title']) {
+                that.columns[i].children = insertTableItem[field]['list']
+              }
             }
-          }
-        }
-        for (let i = 0; i < this.columns.length; i ++) {
-          for (let j = 0; j < insertTableItem.length; j ++) {
-            if (this.columns[i].title == insertTableItem[j]['title']) {
-              this.columns[i].children = insertTableItem[j];
+            // set the mark check method of omics columns' cells
+            for (let i = 0; i < stepRelation[field].length; i++) {
+              insertTableItem[field]['list'][i] = {
+                title: stepRelation[field][i]['stepDictText'],
+                align: 'center',
+                dataIndex: stepRelation[field][i]['omicsStep'] + stepRelation[field][i]['omics'],
+                customRender: (t, r) =>
+                  this.checkMark(stepRelation[field][i]['omics'], stepRelation[field][i]['omicsStep'], r)
+              }
             }
-          }
+          })
+        })
+        .catch(e => {
+          console.log(e)
+        })
+    },
+    getOmics(data) {
+      // console.log(data)
+      let sum = [0, 0, 0]
+      data.forEach(ele => {
+        const index = Number(ele.split('-')[1])
+        sum[index] += Number(ele.split('-')[2])
+      })
+      // console.log(sum)
+      this.queryParam.omicsGeneState = sum[0] !== 0 ? sum[0] + '&' : null
+      this.queryParam.omicsMetabolismState = sum[1] !== 0 ? sum[1] + '&' : null
+      this.queryParam.omicsImageState = sum[2] !== 0 ? sum[2] + '&' : null
+    },
+    handleExport(fileName) {
+      const that = this
+      if (!fileName || typeof fileName != 'string') {
+        fileName = '导出文件'
+      }
+      let param = this.getQueryParams()
+
+      if (this.selectedRowKeys.length === 0) {
+        this.$confirm({
+          title: '导出订单',
+          content: h => <div>是否导出全部订单？</div>,
+          onOk() {
+            that.downLoadFile(param, fileName)
+          },
+          onCancel() {
+            console.log('Cancel')
+          },
+          class: 'test'
+        })
+      } else {
+        const ids = []
+        this.selectionRows.forEach(item => ids.push(item.id))
+        if (this.selectedRowKeys && this.selectedRowKeys.length > 0) {
+          param['selections'] = ids.join(',')
         }
-      }).catch(e => {
-        console.log(e)
+        this.downLoadFile(param, fileName)
+      }
+    },
+    downLoadFile(param, fileName) {
+      downFile(this.url.exportXlsUrl, param).then(data => {
+        if (!data) {
+          this.$message.warning('文件下载失败')
+          return
+        }
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+          window.navigator.msSaveBlob(new Blob([data], { type: 'application/vnd.ms-excel' }), fileName + '.xls')
+        } else {
+          let url = window.URL.createObjectURL(new Blob([data], { type: 'application/vnd.ms-excel' }))
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', fileName + '.xls')
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link) //下载完成移除元素
+          window.URL.revokeObjectURL(url) //释放掉blob对象
+        }
       })
     }
   },
   mounted() {
-    this.user = this.$store.state.user.info;
-    // this.loadOrderStateEnum();
-    this.loadHospitalList();
-    this.loadProductInfoList();
-    this.loadProductAnalysisStepRelation();
-    this.getCurrentTime();
-    if (this.user.role.includes('sales_omics') && !this.user.role.includes('sales_super_omics')) {
+    this.user = this.$store.getters.userRole
+    this.loadHospitalList()
+    this.loadProductInfoList()
+    this.loadProductAnalysisStepRelation()
+    this.loadDistributorList()
+    this.getCurrentTime()
+    if (this.user.includes('sales_omics') && !this.user.includes('sales_super_omics')) {
       this.sellData = [this.user]
     }
   },
@@ -791,6 +912,7 @@ export default {
     justify-items: center;
     align-items: center;
     margin-right: 15px;
+    max-width: 86%;
 
     .title {
       color: rgba(0, 0, 0, 0.85);
@@ -808,14 +930,36 @@ export default {
     }
   }
 
+  .omicsSelect {
+    .ant-select {
+      width: initial !important;
+      min-width: 200px;
+      //max-width: 600px;
+    }
+  }
+
   .ant-btn {
     margin-right: 15px;
   }
 }
+
 .green {
-  color: #00DB00;
+  color: #00db00;
+
   /deep/ svg {
     font-size: 20px;
   }
 }
+
+.red {
+  color: #db0054;
+
+  /deep/ svg {
+    font-size: 20px;
+  }
+}
+
+//.ant-table-body-inner {
+//  max-height: calc(100vh - 390px) !important;
+//}
 </style>

@@ -3,7 +3,7 @@
  * @Date 2021/4/8
  * @description
  */
-import { getAction, postAction, putAction, uploadAction } from '@/api/manage'
+import { getAction, postAction, putAction, uploadAction} from '@/api/manage'
 const prefix = '/mission/projectInfo'
 
 const api = {
@@ -14,7 +14,7 @@ const api = {
   deleteBatch: prefix + '/deleteBatch',
   delete: prefix + '/delete',
   exportXlsUrl: prefix + '/exportXls',
-  importExcelUrl: prefix + '/importExcelUrl',
+  importExcelUrl: prefix + '/importExcelUrl'
 }
 
 export const queryOwnershipType = (params) => getAction('/mission/fileInfo/list', params)
@@ -110,6 +110,7 @@ export const getCaseSampleOrigin = (params) => getAction('/mission/caseSample/or
 // 病例样本信息-查询原始数据
 export const putCaseSampleEdit = (params) => putAction('/mission/caseSample/edit', params)
 
+
 // ======================= 新增
 
 // 样本管理-查看质控报告
@@ -146,6 +147,7 @@ export const queryUserByDepId = (params) => getAction('/sys/user/queryUserByDepI
 // 质检
 export const getAuthForQc = () => getAction('/sys/sysDepart/isQCHead')
 // 入库审核权限
-export const getAuthForTest = () => getAction('/sys/sysDepart/isTestingHead')
+export const getAuthForTest = ()=> getAction('/sys/sysDepart/isTestingHead')
+
 
 export default api
